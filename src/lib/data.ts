@@ -2,9 +2,9 @@
 // Data provider — the single seam between pages and the data source.
 //
 // EVERY page reads org/calendar data through these functions. Nothing
-// imports ../data/organizations.ts directly. When a backend exists,
-// replace the bodies of these functions with fetch() calls that return
-// the same types — pages do not change.
+// imports the seed in ../data/organizations/ directly. When a backend
+// exists, replace the bodies of these functions with fetch() calls that
+// return the same types — pages do not change.
 //
 // Rules that keep the future migration cheap:
 //   1. Pages only ever call functions here (never the seed directly).

@@ -1,10 +1,11 @@
 # wcsmn.com
 
 Community resource for West Coast Swing events and organizations in Minnesota.
-Built with [Astro](https://astro.build/), deployed as a static site to
-Cloudflare Pages.
+Built with [Astro](https://astro.build/) as a static site and deployed to
+Cloudflare Pages. The site is **read-only** — it never authenticates or writes
+data.
 
-## Develop
+## Quick start
 
 ```bash
 npm install
@@ -13,34 +14,48 @@ npm run build    # outputs to dist/
 npm run preview  # preview the production build
 ```
 
-## Architecture
+Requires Node 20+. The build produces a fully static `dist/` — no server.
 
-### Data provider seam
+## What's here
 
-All organization and calendar data is read through a single provider module,
-`src/lib/data.ts`. Pages never import seed data directly — they call
-`getOrganizations()`, `getOrganization(slug)`, and
-`getCombinedCalendarSources()`.
+- A homepage with a combined Google Calendar overlaying every organization's
+  events, color-coded per org.
+- A page per organization (`/organizations/<slug>/`) with its calendar, links,
+  and optional long-form content.
+- Static content pages: FAQ, community resources, contact (form), and
+  contribution guides.
+- A prominent **Bulletin Board** link to the separate community app at
+  `https://bulletinboard-one.vercel.app/`.
 
-Today these functions return in-repo seed data (`src/data/organizations.ts`),
-which is the local stand-in for a future backend. When a backend exists, swap
-the bodies of the provider functions to `fetch()` from it; the return types in
-`src/lib/types.ts` are the contract, so pages do not change.
+## Documentation
 
-Three rules keep that future migration cheap:
+| Doc | What it covers |
+| --- | --- |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Data provider seam, the type contract, per-org data files, calendars, and the planned backend migration. |
+| [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) | Adding an organization or event, editing content, and code conventions. For both community members and developers. |
+| [docs/RELEASING.md](docs/RELEASING.md) | How versioning and releases work (semantic-release + conventional commits) and how the footer version is derived. |
+| [docs/DEPLOY.md](docs/DEPLOY.md) | Cloudflare Pages configuration and environment variables. |
 
-1. Pages only call the provider, never the seed.
-2. The site is read-only — it never authenticates or writes.
-3. The provider's return types are the contract, independent of the source.
+## Project layout
 
-### Calendars
+```
+src/
+├── components/        Nav, CalendarEmbed
+├── data/
+│   └── organizations/ one file per org (+ index.ts that auto-discovers them)
+├── layouts/           Base (shell, head, footer), Page (simple content pages)
+├── lib/
+│   ├── types.ts       the data contract
+│   ├── data.ts        the provider seam (pages only call this)
+│   ├── calendar.ts    Google Calendar embed URL builder
+│   └── build.ts       version/build info for the footer
+├── pages/             routes (homepage, organizations, content pages)
+└── styles/global.css  design tokens + shared styles
+public/                favicons, logo, robots.txt
+```
 
-Calendar IDs and colors live on each organization (and in the combined
-homepage list). Embed URLs are built by `src/lib/calendar.ts` — the org detail
-page renders a single calendar, the homepage overlays all of them.
+## Brand
 
-## Deploy (Cloudflare Pages)
-
-- Framework preset: **Astro**
-- Build command: `npm run build`
-- Build output directory: `dist`
+Pink `#dd4462`, blue `#4467dd`, gold `#fbbe25`; Red Hat Display (headings) +
+Atkinson Hyperlegible (body). Tokens live at the top of
+`src/styles/global.css`.

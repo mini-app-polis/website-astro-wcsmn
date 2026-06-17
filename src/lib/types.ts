@@ -2,8 +2,8 @@
 // Data contract for the WCS MN site.
 //
 // These types are the stable interface between the site's pages and
-// wherever org/calendar data lives. Today the implementation reads
-// from in-repo seed data (see ./organizations.ts). Later, the provider
+// wherever org/calendar data lives. Today the implementation reads from
+// in-repo seed data (see ../data/organizations/). Later, the provider
 // in src/lib/data.ts can be swapped to fetch from a backend that returns
 // these same shapes — pages never change.
 //
