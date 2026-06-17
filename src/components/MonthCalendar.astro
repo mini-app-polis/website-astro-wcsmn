@@ -316,7 +316,10 @@ const {
   })();
 </script>
 
-<style>
+<style is:global>
+  /* Global (not scoped): the grid, cells, and event chips are injected at
+     runtime via innerHTML, so they don't carry Astro's scope attribute.
+     All selectors are .mcal-prefixed to stay namespaced. */
   .mcal {
     background: var(--color-surface);
     border: 1px solid var(--color-border);
@@ -461,6 +464,10 @@ const {
     place-items: center;
     padding: 1rem;
     z-index: 100;
+  }
+  /* `display: grid` above would otherwise defeat the [hidden] attribute. */
+  .mcal__backdrop[hidden] {
+    display: none;
   }
   .mcal__popover {
     position: relative;
