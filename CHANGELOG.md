@@ -1,3 +1,10 @@
+# [2.3.0](https://github.com/mini-app-polis/website-astro-wcsmn/compare/v2.2.1...v2.3.0) (2026-06-17)
+
+
+### Features
+
+* schedule view, month filter ([8677bba](https://github.com/mini-app-polis/website-astro-wcsmn/commit/8677bba43e23e846a2d83eb296ea9b3bcac3eb48))
+
 ## [2.2.1](https://github.com/mini-app-polis/website-astro-wcsmn/compare/v2.2.0...v2.2.1) (2026-06-17)
 
 
