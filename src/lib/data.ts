@@ -12,12 +12,11 @@
 //   3. The return types in ./types.ts are the contract, not the seed shape.
 // ─────────────────────────────────────────────────────────────
 
-import {
-  organizations,
-  combinedCalendarSources,
-  type CombinedCalendarSource,
-} from '../data/organizations';
-import type { Organization } from './types';
+import { organizations } from '../data/organizations';
+import type { Organization, CombinedCalendarSource } from './types';
+
+// Fallback event color for any org that has a calendar but no color set.
+const DEFAULT_CALENDAR_COLOR = '#4467dd';
 
 /** All organizations, in display order. */
 export async function getOrganizations(): Promise<Organization[]> {
@@ -31,9 +30,22 @@ export async function getOrganization(
   return organizations.find((o) => o.slug === slug) ?? null;
 }
 
-/** Sources for the combined homepage calendar embed. */
+/**
+ * Sources for the combined homepage calendar embed.
+ *
+ * Derived from the orgs: every organization that has a calendarId contributes
+ * one source, in org display order, using its own calendarColor. Add or remove
+ * an org (or change its calendar/color) and the homepage updates automatically.
+ * There is no separate hand-maintained source list.
+ */
 export async function getCombinedCalendarSources(): Promise<
   CombinedCalendarSource[]
 > {
-  return combinedCalendarSources;
+  const orgs = await getOrganizations();
+  return orgs
+    .filter((o) => o.calendarId !== null)
+    .map((o) => ({
+      calendarId: o.calendarId as string,
+      color: o.calendarColor ?? DEFAULT_CALENDAR_COLOR,
+    }));
 }

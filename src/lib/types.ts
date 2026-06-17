@@ -10,6 +10,18 @@
 // Keep these fields backend-friendly: flat, serializable, no Astro/JSX.
 // ─────────────────────────────────────────────────────────────
 
+/**
+ * One source in the homepage's combined calendar view: a calendar ID and the
+ * color its events render in. The combined view is derived from the orgs that
+ * have a calendarId (see getCombinedCalendarSources in ../lib/data.ts), so this
+ * is effectively a projection of an Organization, kept as its own shape because
+ * a backend may one day serve the combined feed directly.
+ */
+export interface CombinedCalendarSource {
+  calendarId: string;
+  color: string;
+}
+
 export interface OrgLink {
   /** Visible label, e.g. "Website", "Facebook", "Instagram". */
   label: string;

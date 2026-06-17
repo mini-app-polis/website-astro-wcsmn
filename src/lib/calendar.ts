@@ -8,6 +8,16 @@
 
 const TZ = 'America/Chicago';
 
+// URLSearchParams encodes spaces as '+'. Google Calendar's embed renders the
+// `title` value literally, so '+' would show up in the calendar header. The
+// original embeds used %20, so normalize '+' back to %20 across the query.
+// (No parameter here legitimately contains a '+', so this is safe.)
+function buildEmbedUrl(params: URLSearchParams): string {
+  return `https://calendar.google.com/calendar/embed?${params
+    .toString()
+    .replace(/\+/g, '%20')}`;
+}
+
 interface SingleEmbedOptions {
   calendarId: string;
   color?: string | null;
@@ -33,9 +43,7 @@ export function singleCalendarUrl({
   params.set('mode', mode);
   params.set('src', calendarId);
   if (color) params.set('color', color);
-  // URLSearchParams encodes '#'; Google expects the raw value, so the
-  // leading '#' becomes %23 which Google accepts.
-  return `https://calendar.google.com/calendar/embed?${params.toString()}`;
+  return buildEmbedUrl(params);
 }
 
 interface CombinedSource {
@@ -71,5 +79,5 @@ export function combinedCalendarUrl({
   for (const s of sources) {
     params.append('color', s.color);
   }
-  return `https://calendar.google.com/calendar/embed?${params.toString()}`;
+  return buildEmbedUrl(params);
 }
