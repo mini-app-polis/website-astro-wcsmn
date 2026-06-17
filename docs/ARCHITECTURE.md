@@ -78,12 +78,14 @@ its calendar/color) updates the calendar automatically.
 
 ### Homepage: custom month calendar
 
-The homepage uses `components/MonthCalendar.astro`, a custom client-side month
-grid that fetches events live from the **Google Calendar API** (a public,
-referrer-restricted key in `PUBLIC_GOOGLE_CALENDAR_API_KEY`). This gives us full
-control of the UI — our own grid, color-coded event chips per org, prev/next/
-today navigation, a details popover, and no Google chrome or "+ Google Calendar"
-button. Google expands recurring events for us (`singleEvents=true`).
+The homepage uses `components/MonthCalendar.astro`, a custom client-side
+**per-month schedule (agenda) view** that fetches events live from the **Google
+Calendar API** (a public, referrer-restricted key in
+`PUBLIC_GOOGLE_CALENDAR_API_KEY`). It lists the month's days that have events in
+chronological order, each event color-coded by org with time, title, and org
+name, plus prev/next/today navigation and a click-to-open details popover —
+full control of the UI, no Google chrome or "+ Google Calendar" button. Google
+expands recurring events for us (`singleEvents=true`).
 
 It degrades gracefully: with no key it shows a notice, on fetch error it links
 out to Google, and a `<noscript>` falls back to the Google embed. See

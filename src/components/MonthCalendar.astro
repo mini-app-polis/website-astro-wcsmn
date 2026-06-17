@@ -107,6 +107,8 @@ const {
     // UTC so they never shift across the viewer's local zone.
     const fmtFullDate = new Intl.DateTimeFormat('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
     const dayKeyFmt = new Intl.DateTimeFormat('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit', timeZone });
+    // Day header for the schedule (e.g. "Fri"), formatted in UTC from a date key.
+    const fmtSchedDow = new Intl.DateTimeFormat('en-US', { weekday: 'short', timeZone: 'UTC' });
 
     const cache = new Map();
     let view = new Date();
@@ -114,11 +116,10 @@ const {
 
     const todayKey = dayKeyFmt.format(new Date());
 
-    function gridRange(d) {
+    // First day of the month through the first day of the next month.
+    function monthRange(d) {
       const start = new Date(d.getFullYear(), d.getMonth(), 1);
-      start.setDate(start.getDate() - start.getDay());
-      const end = new Date(start);
-      end.setDate(start.getDate() + 42);
+      const end = new Date(d.getFullYear(), d.getMonth() + 1, 1);
       return { start, end };
     }
 
@@ -145,7 +146,7 @@ const {
       if (cache.has(key)) return cache.get(key);
       if (!apiKey) throw new Error('NO_KEY');
 
-      const { start, end } = gridRange(d);
+      const { start, end } = monthRange(d);
       const params = (id) =>
         `key=${encodeURIComponent(apiKey)}&singleEvents=true&orderBy=startTime&maxResults=2500` +
         `&timeMin=${encodeURIComponent(start.toISOString())}` +
@@ -173,43 +174,62 @@ const {
       return new Date(ev.start.dateTime || ev.start.date + 'T00:00:00').getTime();
     }
 
+    // Per-month schedule (agenda) view: a chronological list of the days that
+    // have events, each day showing its events in time order.
     function render(events) {
+      const ym = `${view.getFullYear()}-${String(view.getMonth() + 1).padStart(2, '0')}`;
       titleEl.textContent = `${MONTHS[view.getMonth()]} ${view.getFullYear()}`;
 
       const byDay = new Map();
       for (const item of events) {
         for (const k of coveredKeys(item.ev)) {
+          if (!k.startsWith(ym)) continue; // keep only days in this month
           if (!byDay.has(k)) byDay.set(k, []);
           byDay.get(k).push(item);
         }
       }
       for (const list of byDay.values()) list.sort((a, b) => startMs(a) - startMs(b));
 
-      const { start } = gridRange(view);
-      let html = '<div class="mcal__dow" aria-hidden="true">' + DOW.map((d) => `<span>${d}</span>`).join('') + '</div><div class="mcal__cells">';
-
+      const dayKeys = [...byDay.keys()].sort();
       window.__mcalEvents = [];
-      for (let i = 0; i < 42; i++) {
-        const cell = new Date(start);
-        cell.setDate(start.getDate() + i);
-        const key = `${cell.getFullYear()}-${String(cell.getMonth() + 1).padStart(2, '0')}-${String(cell.getDate()).padStart(2, '0')}`;
-        const dim = cell.getMonth() !== view.getMonth();
-        const isToday = key === todayKey;
-        const dayEvents = byDay.get(key) || [];
 
-        const chips = dayEvents
+      if (dayKeys.length === 0) {
+        grid.innerHTML = '<p class="mcal__empty">No events scheduled this month.</p>';
+        return;
+      }
+
+      let html = '<ol class="mcal__sched">';
+      for (const key of dayKeys) {
+        const d = new Date(key + 'T00:00:00Z');
+        const dow = fmtSchedDow.format(d);
+        const num = Number(key.slice(8, 10));
+        const isToday = key === todayKey;
+
+        const rows = byDay
+          .get(key)
           .map((item) => {
             const idx = window.__mcalEvents.push(item) - 1;
-            const t = item.ev.start.date ? '' : fmtTime.format(new Date(item.ev.start.dateTime)) + ' ';
-            const label = (t + (item.ev.summary || 'Event')).replace(/</g, '&lt;');
-            return `<button class="mcal__ev" style="background:${item.color}" data-eid="${idx}" title="${label}">${label}</button>`;
+            const time = item.ev.start.date ? 'All day' : fmtTime.format(new Date(item.ev.start.dateTime));
+            const title = (item.ev.summary || 'Event').replace(/</g, '&lt;');
+            const org = item.org.replace(/</g, '&lt;');
+            return (
+              `<button class="mcal__row" data-eid="${idx}">` +
+              `<span class="dot" style="background:${item.color}"></span>` +
+              `<span class="mcal__rowtime">${time}</span>` +
+              `<span class="mcal__rowtitle">${title}</span>` +
+              `<span class="mcal__roworg">${org}</span>` +
+              `</button>`
+            );
           })
           .join('');
 
-        html += `<div class="mcal__cell${dim ? ' is-dim' : ''}${isToday ? ' is-today' : ''}">` +
-          `<span class="mcal__num">${cell.getDate()}</span>${chips}</div>`;
+        html +=
+          `<li class="mcal__day${isToday ? ' is-today' : ''}">` +
+          `<div class="mcal__date"><span class="mcal__date-dow">${dow}</span>` +
+          `<span class="mcal__date-num">${num}</span></div>` +
+          `<div class="mcal__rows">${rows}</div></li>`;
       }
-      html += '</div>';
+      html += '</ol>';
       grid.innerHTML = html;
     }
 
@@ -285,9 +305,9 @@ const {
     }
 
     grid.addEventListener('click', (e) => {
-      const btn = e.target.closest('[data-eid]');
-      if (!btn) return;
-      const item = window.__mcalEvents[Number(btn.dataset.eid)];
+      const evBtn = e.target.closest('[data-eid]');
+      if (!evBtn) return;
+      const item = window.__mcalEvents[Number(evBtn.dataset.eid)];
       if (item) openPopover(item);
     });
     backdrop.addEventListener('click', (e) => {
@@ -386,74 +406,123 @@ const {
     color: var(--color-muted);
     font-size: 0.95rem;
   }
-  .mcal__dow {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    background: var(--color-border);
-    gap: 1px;
-  }
-  .mcal__dow span {
-    background: var(--color-surface);
+  .mcal__empty {
+    margin: 0;
+    padding: 2.5rem 1.4rem;
     text-align: center;
+    color: var(--color-muted);
+  }
+  .mcal__sched {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .mcal__day {
+    display: grid;
+    grid-template-columns: 4rem 1fr;
+    gap: 1rem;
+    padding: 1rem 1.4rem;
+    border-top: 1px solid var(--color-border);
+  }
+  .mcal__day:first-child {
+    border-top: 0;
+  }
+  .mcal__date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 0.35rem;
+  }
+  .mcal__date-dow {
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     letter-spacing: 0.04em;
     text-transform: uppercase;
     color: var(--color-muted);
-    padding: 0.55rem 0;
   }
-  .mcal__cells {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 1px;
-    background: var(--color-border);
+  .mcal__date-num {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 1.6rem;
+    line-height: 1.1;
   }
-  .mcal__cell {
-    background: var(--color-surface);
-    min-height: 6.2rem;
-    padding: 0.4rem 0.45rem 0.55rem;
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-  }
-  .mcal__cell.is-dim {
-    background: color-mix(in srgb, var(--color-surface) 92%, var(--color-bg));
-  }
-  .mcal__num {
-    font-size: 0.78rem;
-    color: var(--color-muted);
-  }
-  .mcal__cell.is-today .mcal__num {
+  .mcal__day.is-today .mcal__date-num {
     background: var(--color-pink);
     color: #fff;
-    width: 1.5rem;
-    height: 1.5rem;
+    width: 2.3rem;
+    height: 2.3rem;
     display: grid;
     place-items: center;
     border-radius: 50%;
-    font-weight: 700;
   }
-  .mcal__ev {
-    display: block;
+  .mcal__rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .mcal__row {
+    display: grid;
+    grid-template-columns: auto 5rem 1fr auto;
+    align-items: center;
+    gap: 0.75rem;
     width: 100%;
     text-align: left;
-    border: 0;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
     cursor: pointer;
     font: inherit;
-    font-size: 0.72rem;
-    line-height: 1.25;
-    color: #fff;
-    border-radius: 5px;
-    padding: 2px 6px;
+    color: var(--color-text);
+    padding: 0.6rem 0.85rem;
+    border-radius: var(--radius-sm);
+    transition:
+      border-color 0.15s,
+      background 0.15s;
+  }
+  .mcal__row:hover,
+  .mcal__row:focus-visible {
+    border-color: var(--color-blue);
+    background: var(--color-bg);
+    outline: none;
+  }
+  .mcal__rowtime {
+    color: var(--color-muted);
+    font-size: 0.9rem;
     white-space: nowrap;
+  }
+  .mcal__rowtitle {
+    font-weight: 700;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
   }
-  .mcal__ev:hover,
-  .mcal__ev:focus-visible {
-    filter: brightness(0.92);
-    outline: none;
+  .mcal__roworg {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.78rem;
+    color: var(--color-muted);
+    white-space: nowrap;
+  }
+  @media (max-width: 600px) {
+    .mcal__day {
+      grid-template-columns: 3rem 1fr;
+      gap: 0.75rem;
+      padding: 0.85rem 1rem;
+    }
+    .mcal__row {
+      grid-template-columns: auto auto 1fr;
+      column-gap: 0.6rem;
+    }
+    .mcal__roworg {
+      grid-column: 2 / -1;
+      grid-row: 2;
+    }
+    .mcal__rowtitle {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      white-space: normal;
+    }
   }
 
   .mcal__backdrop {
@@ -525,14 +594,5 @@ const {
   .mcal__poplink {
     font-family: var(--font-display);
     font-weight: 700;
-  }
-
-  @media (max-width: 640px) {
-    .mcal__cell {
-      min-height: 4.5rem;
-    }
-    .mcal__ev {
-      font-size: 0.66rem;
-    }
   }
 </style>
