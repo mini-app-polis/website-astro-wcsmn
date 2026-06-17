@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import Nav from '../components/Nav.astro';
+import { getBuildInfo } from '../lib/build';
 
 interface Props {
   title: string;
@@ -10,6 +11,7 @@ interface Props {
 const { title, description = 'A community resource for West Coast Swing in Minnesota.' } = Astro.props;
 const fullTitle = title === 'WCS Minnesota' ? title : `${title} — WCS Minnesota`;
 const year = new Date().getFullYear();
+const build = getBuildInfo();
 ---
 
 <!doctype html>
@@ -21,6 +23,11 @@ const year = new Date().getFullYear();
     <meta name="description" content={description} />
     <meta name="theme-color" content="#dd4462" />
     <link rel="canonical" href={Astro.url.href} />
+
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
 
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
@@ -50,6 +57,9 @@ const year = new Date().getFullYear();
           <a href="https://github.com/kaianolevine/wcsmn.com">GitHub</a> · ©
           {year} WCS Minnesota
         </p>
+        <p class="build-info">
+          Version: {build.version} · {build.commit}
+        </p>
       </div>
     </footer>
 
@@ -63,6 +73,10 @@ const year = new Date().getFullYear();
       }
       .site-footer p {
         margin: 0.25rem 0;
+      }
+      .build-info {
+        font-size: 0.8rem;
+        opacity: 0.7;
       }
     </style>
   </body>

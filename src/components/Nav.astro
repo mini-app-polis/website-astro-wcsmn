@@ -20,7 +20,15 @@ const nav: NavItem[] = topNav.map((item) =>
 
 <nav class="site-nav" aria-label="Main">
   <div class="wrapper site-nav__inner">
-    <a href="/" class="site-nav__brand">WCS&nbsp;Minnesota</a>
+    <a href="/" class="site-nav__brand" aria-label="WCS Minnesota — home">
+      <img
+        src="/img/logo.png"
+        alt="WCS Minnesota logo"
+        class="site-nav__logo"
+        height="40"
+        loading="eager"
+      />
+    </a>
     <button
       class="site-nav__toggle"
       aria-expanded="false"
@@ -65,12 +73,15 @@ const nav: NavItem[] = topNav.map((item) =>
     padding-block: 0.75rem;
   }
   .site-nav__brand {
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: 1.2rem;
-    color: var(--color-primary);
+    display: inline-flex;
+    align-items: center;
     text-decoration: none;
-    white-space: nowrap;
+    line-height: 0;
+  }
+  .site-nav__logo {
+    height: 40px;
+    width: auto;
+    display: block;
   }
   .site-nav__toggle {
     display: none;
