@@ -1,3 +1,10 @@
+# [2.2.0](https://github.com/mini-app-polis/website-astro-wcsmn/compare/v2.1.2...v2.2.0) (2026-06-17)
+
+
+### Features
+
+* custome calendar on the homepage ([22df01f](https://github.com/mini-app-polis/website-astro-wcsmn/commit/22df01fcb2371a927388b46db4c06bf885832103))
+
 ## [2.1.2](https://github.com/mini-app-polis/website-astro-wcsmn/compare/v2.1.1...v2.1.2) (2026-06-17)
 
 
