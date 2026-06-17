@@ -40,7 +40,14 @@ const calUrl = org.calendarId
         org.links.length > 0 && (
           <div class="chips">
             {org.links.map((link) => (
-              <a class="chip" href={link.url}>
+              <a
+                class="chip"
+                href={link.url}
+                target={link.url.startsWith('http') ? '_blank' : undefined}
+                rel={
+                  link.url.startsWith('http') ? 'noopener noreferrer' : undefined
+                }
+              >
                 {link.label}
               </a>
             ))}

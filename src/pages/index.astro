@@ -7,7 +7,7 @@ import { combinedCalendarUrl } from '../lib/calendar';
 const sources = await getCombinedCalendarSources();
 const calUrl = combinedCalendarUrl({
   sources: sources.map((s) => ({ calendarId: s.calendarId, color: s.color })),
-  title: 'WCS MN',
+  title: 'WCS Minnesota',
   mode: 'MONTH',
   height: 800,
 });
