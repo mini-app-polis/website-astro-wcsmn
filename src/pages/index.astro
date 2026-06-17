@@ -1,7 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import CalendarEmbed from '../components/CalendarEmbed.astro';
-import { getCombinedCalendarSources } from '../lib/data';
+import { getCombinedCalendarSources, getOrganizations } from '../lib/data';
 import { combinedCalendarUrl } from '../lib/calendar';
 
 const sources = await getCombinedCalendarSources();
@@ -11,57 +11,120 @@ const calUrl = combinedCalendarUrl({
   mode: 'MONTH',
   height: 800,
 });
+
+// Legend: orgs that contribute a calendar, with their event color.
+const orgs = await getOrganizations();
+const legend = orgs
+  .filter((o) => o.calendarId !== null)
+  .map((o) => ({ name: o.name, color: o.calendarColor ?? '#4467dd' }));
 ---
 
 <Base title="WCS Minnesota">
-  <header class="hero region">
-    <div class="wrapper text-center">
-      <h1>WCS Minnesota</h1>
+  <header class="hero">
+    <div class="wrapper hero__inner">
+      <span class="eyebrow">West Coast Swing · Minnesota</span>
+      <h1>Find your next dance.</h1>
+      <p>
+        One community calendar pulling together every West Coast Swing
+        organization in Minnesota — dances, lessons, and events, all in one
+        place.
+      </p>
+      <div class="hero__actions">
+        <a class="button button--gold" href="#calendar">See what's on →</a>
+        <a class="button button--ghost" href="/organizations/"
+          >Browse organizations</a
+        >
+      </div>
     </div>
   </header>
 
-  <article class="region" style="padding-top:1.5rem">
-    <div class="wrapper prose flow" style="max-width:60rem;text-align:center">
+  <article class="region">
+    <div class="wrapper prose flow" style="max-width:60rem">
       <p>
         Welcome! This is an independent, community-driven resource created to
         help dancers discover and stay connected with West Coast Swing events
         and opportunities throughout Minnesota.
       </p>
       <p>
-        The project is just getting started, and it grows stronger with
-        community involvement. If you have feedback, notice something missing,
-        or want to help keep the information up to date, we would love to hear
-        from you — please use the <a href="/contact/">Contact page</a> to share
-        your thoughts or submit updates.
-      </p>
-      <p>
-        Below you'll find a calendar of public WCS events happening across
-        Minnesota. If you know of an event that isn't listed, feel free to send
-        it our way so we can include it and help others find it too.
-      </p>
-      <p>
-        You can also explore the
+        The project grows stronger with community involvement. If you notice
+        something missing or want to help keep the information up to date, we'd
+        love to hear from you — please use the <a href="/contact/">Contact page</a>
+        to share your thoughts or submit updates. You can also explore the
         <a href="/community-resources/">Community Resources page</a> to connect
-        with local dancers, organizers, and other helpful resources within the
-        scene.
+        with local dancers and organizers.
       </p>
-      <p>Thanks for being part of the community — and helping it grow!</p>
     </div>
 
-    <div class="wrapper" style="margin-top:2rem">
-      <CalendarEmbed src={calUrl} title="WCS Minnesota combined events calendar" height={700} />
+    <div class="wrapper" id="calendar">
+      <div class="cal-card">
+        <div class="cal-card__top">
+          <h2>Events across Minnesota</h2>
+          <ul class="cal-legend">
+            {
+              legend.map((l) => (
+                <li>
+                  <span class="dot" style={`background:${l.color}`} />
+                  {l.name}
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+        <CalendarEmbed
+          src={calUrl}
+          title="WCS Minnesota combined events calendar"
+          height={700}
+        />
+      </div>
     </div>
   </article>
 </Base>
 
 <style>
   .hero {
-    background: var(--color-primary);
+    position: relative;
+    overflow: hidden;
+    background: var(--brand-gradient);
     color: #fff;
-    padding-block: clamp(2.5rem, 2rem + 4vw, 5rem);
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    right: -120px;
+    top: -120px;
+    width: 420px;
+    height: 420px;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      rgba(251, 190, 37, 0.5),
+      transparent 65%
+    );
+    pointer-events: none;
+  }
+  .hero__inner {
+    position: relative;
+    z-index: 1;
+    padding-block: clamp(3.5rem, 2.5rem + 5vw, 5.75rem);
+    max-width: 42rem;
+  }
+  .hero .eyebrow {
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
   }
   .hero h1 {
     color: #fff;
-    margin: 0;
+    margin: 1.1rem 0 1rem;
+  }
+  .hero p {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.92);
+    max-width: 34rem;
+    margin: 0 0 1.8rem;
+  }
+  .hero__actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
   }
 </style>

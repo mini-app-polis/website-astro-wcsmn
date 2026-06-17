@@ -48,35 +48,106 @@ const build = getBuildInfo();
     </main>
     <footer class="site-footer">
       <div class="wrapper">
-        <p>
-          An independent, community-driven resource for West Coast Swing in
-          Minnesota.
-        </p>
-        <p>
-          <a href="/contact/">Contact</a> ·
-          <a href="https://github.com/kaianolevine/wcsmn.com">GitHub</a> · ©
-          {year} WCS Minnesota
-        </p>
-        <p class="build-info">
-          Version: {build.version} · {build.commit}
-        </p>
+        <div class="site-footer__cols">
+          <div>
+            <p class="site-footer__lede">WCS Minnesota</p>
+            <p class="site-footer__about">
+              An independent, community-driven resource for West Coast Swing
+              across Minnesota.
+            </p>
+          </div>
+          <nav class="site-footer__nav" aria-label="Explore">
+            <h2>Explore</h2>
+            <a href="/organizations/">Organizations</a>
+            <a href="/#calendar">Calendar</a>
+            <a href="/community-resources/">Resources</a>
+            <a href="/faq/">FAQ</a>
+          </nav>
+          <nav class="site-footer__nav" aria-label="Contribute">
+            <h2>Contribute</h2>
+            <a href="/contributions/add-event/">Add an event</a>
+            <a href="/contributions/add-organization/">Add an organization</a>
+            <a href="/contributions/contributors/">Contributors</a>
+            <a href="/contact/">Contact</a>
+          </nav>
+          <nav class="site-footer__nav" aria-label="Community">
+            <h2>Community</h2>
+            <a
+              href="https://bulletinboard-one.vercel.app/"
+              target="_blank"
+              rel="noopener noreferrer">Bulletin Board ↗</a
+            >
+            <a href="https://github.com/mini-app-polis/website-astro-wcsmn"
+              >GitHub ↗</a
+            >
+          </nav>
+        </div>
+        <div class="site-footer__bottom">
+          <span>© {year} WCS Minnesota</span>
+          <span>Version: {build.version} · {build.commit}</span>
+        </div>
       </div>
     </footer>
 
     <style>
       .site-footer {
         margin-top: 4rem;
-        border-top: 1px solid var(--color-border);
-        padding-block: 2rem;
-        color: var(--color-muted);
+        background: #1f1f23;
+        color: #cfcfd4;
+        padding-block: 3.25rem 1.75rem;
         font-size: 0.95rem;
       }
-      .site-footer p {
-        margin: 0.25rem 0;
+      .site-footer__cols {
+        display: grid;
+        grid-template-columns: 1.6fr 1fr 1fr 1fr;
+        gap: 2rem;
       }
-      .build-info {
-        font-size: 0.8rem;
-        opacity: 0.7;
+      .site-footer__lede {
+        font-family: var(--font-display);
+        font-weight: 900;
+        color: #fff;
+        font-size: 1.1rem;
+        margin: 0 0 0.5rem;
+      }
+      .site-footer__about {
+        color: #a4a4ac;
+        max-width: 24rem;
+        margin: 0;
+      }
+      .site-footer__nav h2 {
+        color: #fff;
+        font-size: 1rem;
+        margin: 0 0 0.6rem;
+      }
+      .site-footer__nav a {
+        display: block;
+        color: #cfcfd4;
+        text-decoration: none;
+        padding: 0.2rem 0;
+      }
+      .site-footer__nav a:hover {
+        color: #fff;
+      }
+      .site-footer__bottom {
+        margin-top: 2.4rem;
+        padding-top: 1.2rem;
+        border-top: 1px solid #34343b;
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+        font-size: 0.85rem;
+        color: #8b8b93;
+      }
+      @media (max-width: 780px) {
+        .site-footer__cols {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      @media (max-width: 480px) {
+        .site-footer__cols {
+          grid-template-columns: 1fr;
+        }
       }
     </style>
   </body>

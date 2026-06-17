@@ -15,6 +15,8 @@ if (!org) {
   return Astro.redirect('/organizations/');
 }
 
+const accent = org.calendarColor ?? '#4467dd';
+
 const calUrl = org.calendarId
   ? singleCalendarUrl({
       calendarId: org.calendarId,
@@ -27,50 +29,94 @@ const calUrl = org.calendarId
 
 <Base title={org.name} description={org.blurb}>
   <header class="page-header region">
+    <div class="page-header__accent" style={`background:${accent}`}></div>
     <div class="wrapper">
-      <h1>{org.name}</h1>
+      <p class="page-header__crumb">
+        <a href="/organizations/">← Organizations</a>
+      </p>
+      <h1><span class="dot" style={`background:${accent}`}></span>{org.name}</h1>
+      <p class="page-header__lead">{org.blurb}</p>
+      {
+        org.links.length > 0 && (
+          <div class="chips">
+            {org.links.map((link) => (
+              <a class="chip" href={link.url}>
+                {link.label}
+              </a>
+            ))}
+          </div>
+        )
+      }
     </div>
   </header>
 
   <article class="region" style="padding-top:0">
-    <div class="wrapper prose flow">
-      <p>{org.blurb}</p>
-
+    <div class="wrapper">
       {
-        org.links.length > 0 && (
-          <p class="org-links">
-            {org.links.map((link, i) => (
-              <>
-                {i > 0 && <span aria-hidden="true"> · </span>}
-                <a href={link.url}>{link.label}</a>
-              </>
-            ))}
-          </p>
+        calUrl && (
+          <div class="cal-card">
+            <div class="cal-card__top">
+              <h2>{org.name} calendar</h2>
+            </div>
+            <CalendarEmbed
+              src={calUrl}
+              title={`${org.name} event calendar`}
+              height={700}
+            />
+          </div>
         )
       }
 
-      {calUrl && (
-        <CalendarEmbed
-          src={calUrl}
-          title={`${org.name} event calendar`}
-          height={700}
-        />
-      )}
-
-      {org.bodyHtml && <div class="org-body" set:html={org.bodyHtml} />}
+      {
+        org.bodyHtml && (
+          <div class="prose flow org-body" set:html={org.bodyHtml} />
+        )
+      }
     </div>
   </article>
 </Base>
 
 <style>
   .page-header {
+    position: relative;
     background: var(--color-surface);
     border-bottom: 1px solid var(--color-border);
   }
-  .org-links {
-    font-weight: 600;
+  .page-header__accent {
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 6px;
+  }
+  .page-header__crumb {
+    margin: 0 0 0.75rem;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.92rem;
+  }
+  .page-header__crumb a {
+    color: var(--color-muted);
+    text-decoration: none;
+  }
+  .page-header__crumb a:hover {
+    color: var(--color-pink);
+  }
+  .page-header h1 {
+    display: flex;
+    align-items: center;
+    gap: 0.6ch;
+  }
+  .page-header h1 .dot {
+    width: 16px;
+    height: 16px;
+  }
+  .page-header__lead {
+    color: var(--color-muted);
+    max-width: 48rem;
+    margin: 0.75rem 0 1.1rem;
+    font-size: 1.08rem;
   }
   .org-body {
-    margin-top: 2rem;
+    margin-top: 2.5rem;
+    max-width: 60rem;
   }
 </style>

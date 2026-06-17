@@ -11,10 +11,11 @@ const orgs = await getOrganizations();
 >
   <header class="page-header region">
     <div class="wrapper">
+      <span class="eyebrow">The community</span>
       <h1>Organizations</h1>
-      <p style="color:var(--color-muted);max-width:48rem">
-        West Coast Swing organizations across Minnesota. Select one to see its
-        details and event calendar.
+      <p class="page-header__lead">
+        Six groups keep West Coast Swing alive across Minnesota. Each sets its
+        own calendar — the homepage just brings them together.
       </p>
     </div>
   </header>
@@ -25,17 +26,32 @@ const orgs = await getOrganizations();
         {
           orgs.map((org) => (
             <li class="org-card">
-              <h2>
-                <a href={`/organizations/${org.slug}/`}>{org.name}</a>
-              </h2>
-              <p>{org.blurb}</p>
-              <a
-                class="button"
-                href={`/organizations/${org.slug}/`}
-                style="font-size:0.9rem;padding:0.5rem 1rem"
-              >
-                View details
-              </a>
+              <div
+                class="org-card__stripe"
+                style={`background:${org.calendarColor ?? '#4467dd'}`}
+              />
+              <div class="org-card__body">
+                <h2>
+                  <span
+                    class="dot"
+                    style={`background:${org.calendarColor ?? '#4467dd'}`}
+                  />
+                  <a href={`/organizations/${org.slug}/`}>{org.name}</a>
+                </h2>
+                <p class="org-card__blurb">{org.blurb}</p>
+                {org.links.length > 0 && (
+                  <div class="chips">
+                    {org.links.map((link) => (
+                      <a class="chip" href={link.url}>
+                        {link.label}
+                      </a>
+                    ))}
+                  </div>
+                )}
+                <a class="org-card__more" href={`/organizations/${org.slug}/`}>
+                  View details →
+                </a>
+              </div>
             </li>
           ))
         }
@@ -48,5 +64,11 @@ const orgs = await getOrganizations();
   .page-header {
     background: var(--color-surface);
     border-bottom: 1px solid var(--color-border);
+  }
+  .page-header__lead {
+    color: var(--color-muted);
+    max-width: 48rem;
+    margin: 0.75rem 0 0;
+    font-size: 1.08rem;
   }
 </style>
