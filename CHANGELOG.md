@@ -1,3 +1,10 @@
+## [2.1.1](https://github.com/mini-app-polis/website-astro-wcsmn/compare/v2.1.0...v2.1.1) (2026-06-17)
+
+
+### Bug Fixes
+
+* ui overhall ([4712264](https://github.com/mini-app-polis/website-astro-wcsmn/commit/4712264c831746b49ad43fe6ef9d22ce3cfb02ac))
+
 # [2.1.0](https://github.com/mini-app-polis/website-astro-wcsmn/compare/v2.0.2...v2.1.0) (2026-06-17)
 
 
