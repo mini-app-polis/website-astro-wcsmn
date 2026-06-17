@@ -542,15 +542,29 @@ const {
     }
     .mcal__row {
       grid-template-columns: auto auto 1fr;
+      grid-template-rows: auto auto;
       column-gap: 0.6rem;
+      row-gap: 0.3rem;
+      align-items: start;
+    }
+    .mcal__row > .dot {
+      grid-row: 1;
+      grid-column: 1;
+      margin-top: 0.4rem;
+    }
+    .mcal__rowtime {
+      grid-row: 1;
+      grid-column: 2;
     }
     .mcal__roworg {
-      grid-column: 2 / -1;
-      grid-row: 2;
+      grid-row: 1;
+      grid-column: 3;
+      justify-self: end;
+      text-align: right;
     }
     .mcal__rowtitle {
-      grid-column: 1 / -1;
       grid-row: 2;
+      grid-column: 1 / -1;
       white-space: normal;
     }
   }
