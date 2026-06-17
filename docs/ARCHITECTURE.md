@@ -71,15 +71,29 @@ that assembles calendar query strings:
 Both route through a helper that normalizes spaces to `%20` (Google renders the
 `title` literally, so a `+` would show up in the header).
 
-The homepage's combined calendar is **derived from the organizations** — every
-org with a `calendarId` contributes one color-coded source, in display order.
-There is no separate hand-maintained source list, so adding or removing an org
-(or changing its calendar/color) updates the homepage automatically. The
-homepage also renders a color legend from the same data.
+The calendar sources are **derived from the organizations** — every org with a
+`calendarId` contributes one color-coded source, in display order. There is no
+separate hand-maintained source list, so adding or removing an org (or changing
+its calendar/color) updates the calendar automatically.
 
-> Note: the calendar is Google's embed for now. A custom calendar view (which
-> would let us fully control the UI, e.g. hide the "+ Google Calendar"
-> subscribe button) is a deferred Phase 2 item.
+### Homepage: custom month calendar
+
+The homepage uses `components/MonthCalendar.astro`, a custom client-side month
+grid that fetches events live from the **Google Calendar API** (a public,
+referrer-restricted key in `PUBLIC_GOOGLE_CALENDAR_API_KEY`). This gives us full
+control of the UI — our own grid, color-coded event chips per org, prev/next/
+today navigation, a details popover, and no Google chrome or "+ Google Calendar"
+button. Google expands recurring events for us (`singleEvents=true`).
+
+It degrades gracefully: with no key it shows a notice, on fetch error it links
+out to Google, and a `<noscript>` falls back to the Google embed. See
+[DEPLOY.md](DEPLOY.md#environment-variables) for the key setup.
+
+### Org detail pages: Google embed
+
+Individual org pages still render the standard Google Calendar embed
+(`components/CalendarEmbed.astro`) for that org's single calendar — simpler, and
+no API key needed for those.
 
 ## Layouts, components, styles
 

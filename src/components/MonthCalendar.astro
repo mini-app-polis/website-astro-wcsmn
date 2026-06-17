@@ -1,0 +1,531 @@
+---
+// Custom month calendar for the homepage only. Fetches events live from the
+// Google Calendar API (public, referrer-restricted key) and renders our own
+// color-coded grid — so we fully control the UI (no Google chrome, no
+// "+ Google Calendar" button). Org detail pages still use the Google embed.
+//
+// Data flows through the provider seam: the page builds `sources` from
+// getOrganizations(); this component is presentation only.
+
+interface CalendarSource {
+  id: string;
+  color: string;
+  name: string;
+}
+
+interface Props {
+  sources: CalendarSource[];
+  apiKey: string;
+  /** Google embed URL, used as the no-JS / error fallback. */
+  fallbackSrc?: string;
+  timeZone?: string;
+}
+
+const {
+  sources,
+  apiKey,
+  fallbackSrc,
+  timeZone = 'America/Chicago',
+} = Astro.props;
+---
+
+<section class="mcal" data-mcal aria-label="WCS Minnesota events calendar">
+  <div class="mcal__bar">
+    <div class="mcal__nav">
+      <button class="mcal__btn" data-mcal-prev aria-label="Previous month">
+        <span aria-hidden="true">‹</span>
+      </button>
+      <h2 class="mcal__title" data-mcal-title aria-live="polite">&nbsp;</h2>
+      <button class="mcal__btn" data-mcal-next aria-label="Next month">
+        <span aria-hidden="true">›</span>
+      </button>
+      <button class="mcal__today" data-mcal-today>Today</button>
+    </div>
+    <ul class="cal-legend">
+      {
+        sources.map((s) => (
+          <li>
+            <span class="dot" style={`background:${s.color}`} />
+            {s.name}
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+
+  <p class="mcal__status" data-mcal-status role="status">Loading events…</p>
+
+  <div class="mcal__grid" data-mcal-grid></div>
+
+  {
+    fallbackSrc && (
+      <noscript>
+        <iframe
+          class="calendar-embed"
+          src={fallbackSrc}
+          title="WCS Minnesota combined events calendar"
+          loading="lazy"
+          style="height:700px;border:0;width:100%"
+        />
+      </noscript>
+    )
+  }
+
+  <div class="mcal__backdrop" data-mcal-backdrop hidden>
+    <div
+      class="mcal__popover"
+      data-mcal-popover
+      role="dialog"
+      aria-modal="true"
+      aria-label="Event details"
+    >
+      <button class="mcal__popclose" data-mcal-popclose aria-label="Close">
+        <span aria-hidden="true">×</span>
+      </button>
+      <div data-mcal-popbody></div>
+    </div>
+  </div>
+</section>
+
+<script define:vars={{ sources, apiKey, timeZone, fallbackSrc }}>
+  (() => {
+    const root = document.querySelector('[data-mcal]');
+    if (!root) return;
+
+    const grid = root.querySelector('[data-mcal-grid]');
+    const titleEl = root.querySelector('[data-mcal-title]');
+    const statusEl = root.querySelector('[data-mcal-status]');
+    const backdrop = root.querySelector('[data-mcal-backdrop]');
+    const popBody = root.querySelector('[data-mcal-popbody]');
+
+    const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+    const fmtTime = new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit', timeZone });
+    const fmtFull = new Intl.DateTimeFormat('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric', timeZone });
+    // All-day dates are plain calendar dates with no time zone; format them in
+    // UTC so they never shift across the viewer's local zone.
+    const fmtFullDate = new Intl.DateTimeFormat('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+    const dayKeyFmt = new Intl.DateTimeFormat('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit', timeZone });
+
+    const cache = new Map();
+    let view = new Date();
+    view = new Date(view.getFullYear(), view.getMonth(), 1);
+
+    const todayKey = dayKeyFmt.format(new Date());
+
+    function gridRange(d) {
+      const start = new Date(d.getFullYear(), d.getMonth(), 1);
+      start.setDate(start.getDate() - start.getDay());
+      const end = new Date(start);
+      end.setDate(start.getDate() + 42);
+      return { start, end };
+    }
+
+    function dayKeyOf(dateObj) {
+      return dayKeyFmt.format(dateObj);
+    }
+
+    // Date keys (YYYY-MM-DD) an event covers.
+    function coveredKeys(ev) {
+      if (ev.start.date) {
+        const keys = [];
+        const s = new Date(ev.start.date + 'T00:00:00Z');
+        const e = ev.end && ev.end.date ? new Date(ev.end.date + 'T00:00:00Z') : new Date(s.getTime() + 86400000);
+        for (let d = new Date(s); d < e; d.setUTCDate(d.getUTCDate() + 1)) {
+          keys.push(`${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`);
+        }
+        return keys.length ? keys : [ev.start.date];
+      }
+      return [dayKeyOf(new Date(ev.start.dateTime))];
+    }
+
+    async function fetchMonth(d) {
+      const key = `${d.getFullYear()}-${d.getMonth()}`;
+      if (cache.has(key)) return cache.get(key);
+      if (!apiKey) throw new Error('NO_KEY');
+
+      const { start, end } = gridRange(d);
+      const params = (id) =>
+        `key=${encodeURIComponent(apiKey)}&singleEvents=true&orderBy=startTime&maxResults=2500` +
+        `&timeMin=${encodeURIComponent(start.toISOString())}` +
+        `&timeMax=${encodeURIComponent(end.toISOString())}` +
+        `&timeZone=${encodeURIComponent(timeZone)}`;
+
+      const results = await Promise.all(
+        sources.map(async (s) => {
+          const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(s.id)}/events?${params(s.id)}`;
+          const res = await fetch(url);
+          if (!res.ok) return [];
+          const data = await res.json();
+          return (data.items || [])
+            .filter((ev) => ev.status !== 'cancelled' && (ev.start?.date || ev.start?.dateTime))
+            .map((ev) => ({ ev, color: s.color, org: s.name }));
+        })
+      );
+      const flat = results.flat();
+      cache.set(key, flat);
+      return flat;
+    }
+
+    function startMs(item) {
+      const ev = item.ev;
+      return new Date(ev.start.dateTime || ev.start.date + 'T00:00:00').getTime();
+    }
+
+    function render(events) {
+      titleEl.textContent = `${MONTHS[view.getMonth()]} ${view.getFullYear()}`;
+
+      const byDay = new Map();
+      for (const item of events) {
+        for (const k of coveredKeys(item.ev)) {
+          if (!byDay.has(k)) byDay.set(k, []);
+          byDay.get(k).push(item);
+        }
+      }
+      for (const list of byDay.values()) list.sort((a, b) => startMs(a) - startMs(b));
+
+      const { start } = gridRange(view);
+      let html = '<div class="mcal__dow" aria-hidden="true">' + DOW.map((d) => `<span>${d}</span>`).join('') + '</div><div class="mcal__cells">';
+
+      window.__mcalEvents = [];
+      for (let i = 0; i < 42; i++) {
+        const cell = new Date(start);
+        cell.setDate(start.getDate() + i);
+        const key = `${cell.getFullYear()}-${String(cell.getMonth() + 1).padStart(2, '0')}-${String(cell.getDate()).padStart(2, '0')}`;
+        const dim = cell.getMonth() !== view.getMonth();
+        const isToday = key === todayKey;
+        const dayEvents = byDay.get(key) || [];
+
+        const chips = dayEvents
+          .map((item) => {
+            const idx = window.__mcalEvents.push(item) - 1;
+            const t = item.ev.start.date ? '' : fmtTime.format(new Date(item.ev.start.dateTime)) + ' ';
+            const label = (t + (item.ev.summary || 'Event')).replace(/</g, '&lt;');
+            return `<button class="mcal__ev" style="background:${item.color}" data-eid="${idx}" title="${label}">${label}</button>`;
+          })
+          .join('');
+
+        html += `<div class="mcal__cell${dim ? ' is-dim' : ''}${isToday ? ' is-today' : ''}">` +
+          `<span class="mcal__num">${cell.getDate()}</span>${chips}</div>`;
+      }
+      html += '</div>';
+      grid.innerHTML = html;
+    }
+
+    async function load() {
+      statusEl.hidden = false;
+      statusEl.textContent = 'Loading events…';
+      try {
+        const events = await fetchMonth(view);
+        render(events);
+        statusEl.hidden = true;
+      } catch (err) {
+        grid.innerHTML = '';
+        titleEl.textContent = `${MONTHS[view.getMonth()]} ${view.getFullYear()}`;
+        statusEl.hidden = false;
+        if (err && err.message === 'NO_KEY') {
+          statusEl.textContent = 'Calendar isn’t configured yet.';
+        } else {
+          statusEl.innerHTML = fallbackSrc
+            ? `Couldn’t load events right now. <a href="${fallbackSrc}" target="_blank" rel="noopener noreferrer">View on Google Calendar ↗</a>`
+            : 'Couldn’t load events right now. Please try again later.';
+        }
+      }
+    }
+
+    function openPopover(item) {
+      const ev = item.ev;
+      const allDay = !!ev.start.date;
+      const startD = new Date(ev.start.dateTime || ev.start.date + 'T00:00:00Z');
+      const when = allDay
+        ? fmtFullDate.format(startD) + ' · All day'
+        : fmtFull.format(startD) + ' · ' + fmtTime.format(startD) +
+          (ev.end?.dateTime ? '–' + fmtTime.format(new Date(ev.end.dateTime)) : '');
+
+      popBody.innerHTML = '';
+      const dotName = document.createElement('p');
+      dotName.className = 'mcal__poporg';
+      dotName.innerHTML = `<span class="dot" style="background:${item.color}"></span>`;
+      dotName.append(item.org);
+      const h = document.createElement('h3');
+      h.textContent = ev.summary || 'Event';
+      const w = document.createElement('p');
+      w.className = 'mcal__popwhen';
+      w.textContent = when;
+      popBody.append(dotName, h, w);
+
+      if (ev.location) {
+        const loc = document.createElement('p');
+        loc.className = 'mcal__poploc';
+        loc.textContent = ev.location;
+        popBody.append(loc);
+      }
+      if (ev.description) {
+        const desc = document.createElement('p');
+        desc.className = 'mcal__popdesc';
+        desc.textContent = ev.description.replace(/<[^>]*>/g, '').trim();
+        popBody.append(desc);
+      }
+      if (ev.htmlLink) {
+        const a = document.createElement('a');
+        a.className = 'mcal__poplink';
+        a.href = ev.htmlLink;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.textContent = 'View on Google Calendar ↗';
+        popBody.append(a);
+      }
+      backdrop.hidden = false;
+      root.querySelector('[data-mcal-popclose]').focus();
+    }
+
+    function closePopover() {
+      backdrop.hidden = true;
+    }
+
+    grid.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-eid]');
+      if (!btn) return;
+      const item = window.__mcalEvents[Number(btn.dataset.eid)];
+      if (item) openPopover(item);
+    });
+    backdrop.addEventListener('click', (e) => {
+      if (e.target === backdrop) closePopover();
+    });
+    root.querySelector('[data-mcal-popclose]').addEventListener('click', closePopover);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !backdrop.hidden) closePopover();
+    });
+
+    root.querySelector('[data-mcal-prev]').addEventListener('click', () => {
+      view = new Date(view.getFullYear(), view.getMonth() - 1, 1);
+      load();
+    });
+    root.querySelector('[data-mcal-next]').addEventListener('click', () => {
+      view = new Date(view.getFullYear(), view.getMonth() + 1, 1);
+      load();
+    });
+    root.querySelector('[data-mcal-today]').addEventListener('click', () => {
+      const now = new Date();
+      view = new Date(now.getFullYear(), now.getMonth(), 1);
+      load();
+    });
+
+    load();
+  })();
+</script>
+
+<style>
+  .mcal {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    margin-top: 2rem;
+  }
+  .mcal__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 1.1rem 1.4rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .mcal__nav {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .mcal__title {
+    margin: 0;
+    font-size: 1.25rem;
+    min-width: 11rem;
+  }
+  .mcal__btn {
+    width: 2.1rem;
+    height: 2.1rem;
+    display: grid;
+    place-items: center;
+    font-size: 1.3rem;
+    line-height: 1;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text);
+    border-radius: 0.5rem;
+    cursor: pointer;
+  }
+  .mcal__btn:hover {
+    border-color: var(--color-blue);
+    color: var(--color-blue);
+  }
+  .mcal__today {
+    margin-left: 0.25rem;
+    padding: 0.4rem 0.8rem;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.85rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text);
+    border-radius: 0.5rem;
+    cursor: pointer;
+  }
+  .mcal__today:hover {
+    border-color: var(--color-blue);
+    color: var(--color-blue);
+  }
+  .mcal__status {
+    margin: 0;
+    padding: 1.25rem 1.4rem;
+    color: var(--color-muted);
+    font-size: 0.95rem;
+  }
+  .mcal__dow {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: var(--color-border);
+    gap: 1px;
+  }
+  .mcal__dow span {
+    background: var(--color-surface);
+    text-align: center;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+    padding: 0.55rem 0;
+  }
+  .mcal__cells {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background: var(--color-border);
+  }
+  .mcal__cell {
+    background: var(--color-surface);
+    min-height: 6.2rem;
+    padding: 0.4rem 0.45rem 0.55rem;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .mcal__cell.is-dim {
+    background: color-mix(in srgb, var(--color-surface) 92%, var(--color-bg));
+  }
+  .mcal__num {
+    font-size: 0.78rem;
+    color: var(--color-muted);
+  }
+  .mcal__cell.is-today .mcal__num {
+    background: var(--color-pink);
+    color: #fff;
+    width: 1.5rem;
+    height: 1.5rem;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    font-weight: 700;
+  }
+  .mcal__ev {
+    display: block;
+    width: 100%;
+    text-align: left;
+    border: 0;
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.72rem;
+    line-height: 1.25;
+    color: #fff;
+    border-radius: 5px;
+    padding: 2px 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .mcal__ev:hover,
+  .mcal__ev:focus-visible {
+    filter: brightness(0.92);
+    outline: none;
+  }
+
+  .mcal__backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 20, 20, 0.45);
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    z-index: 100;
+  }
+  .mcal__popover {
+    position: relative;
+    background: var(--color-surface);
+    color: var(--color-text);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    max-width: 30rem;
+    width: 100%;
+    padding: 1.5rem 1.6rem;
+  }
+  .mcal__popclose {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.7rem;
+    width: 2rem;
+    height: 2rem;
+    border: 0;
+    background: transparent;
+    font-size: 1.5rem;
+    line-height: 1;
+    color: var(--color-muted);
+    cursor: pointer;
+    border-radius: 0.4rem;
+  }
+  .mcal__popclose:hover {
+    background: var(--color-bg);
+    color: var(--color-text);
+  }
+  .mcal__poporg {
+    display: flex;
+    align-items: center;
+    gap: 0.5ch;
+    margin: 0 0 0.4rem;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--color-muted);
+  }
+  .mcal__popover h3 {
+    margin: 0 0 0.4rem;
+    font-size: 1.3rem;
+  }
+  .mcal__popwhen {
+    margin: 0 0 0.5rem;
+    font-weight: 700;
+  }
+  .mcal__poploc,
+  .mcal__popdesc {
+    margin: 0 0 0.6rem;
+    color: var(--color-muted);
+    font-size: 0.95rem;
+    white-space: pre-line;
+  }
+  .mcal__poplink {
+    font-family: var(--font-display);
+    font-weight: 700;
+  }
+
+  @media (max-width: 640px) {
+    .mcal__cell {
+      min-height: 4.5rem;
+    }
+    .mcal__ev {
+      font-size: 0.66rem;
+    }
+  }
+</style>

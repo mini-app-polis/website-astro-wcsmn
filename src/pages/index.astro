@@ -1,22 +1,30 @@
 ---
 import Base from '../layouts/Base.astro';
-import CalendarEmbed from '../components/CalendarEmbed.astro';
+import MonthCalendar from '../components/MonthCalendar.astro';
 import { getCombinedCalendarSources, getOrganizations } from '../lib/data';
 import { combinedCalendarUrl } from '../lib/calendar';
 
-const sources = await getCombinedCalendarSources();
-const calUrl = combinedCalendarUrl({
-  sources: sources.map((s) => ({ calendarId: s.calendarId, color: s.color })),
+const combined = await getCombinedCalendarSources();
+// Google embed URL — used as the no-JS / error fallback for the custom calendar.
+const fallbackSrc = combinedCalendarUrl({
+  sources: combined.map((s) => ({ calendarId: s.calendarId, color: s.color })),
   title: 'WCS Minnesota',
   mode: 'MONTH',
   height: 800,
 });
 
-// Legend: orgs that contribute a calendar, with their event color.
+// Calendar sources for the custom month grid: id + color + org name.
 const orgs = await getOrganizations();
-const legend = orgs
+const calendarSources = orgs
   .filter((o) => o.calendarId !== null)
-  .map((o) => ({ name: o.name, color: o.calendarColor ?? '#4467dd' }));
+  .map((o) => ({
+    id: o.calendarId as string,
+    color: o.calendarColor ?? '#4467dd',
+    name: o.name,
+  }));
+
+// Public, referrer-restricted Google Calendar API key (client-side fetch).
+const apiKey = import.meta.env.PUBLIC_GOOGLE_CALENDAR_API_KEY ?? '';
 ---
 
 <Base title="WCS Minnesota">
@@ -56,26 +64,11 @@ const legend = orgs
     </div>
 
     <div class="wrapper" id="calendar">
-      <div class="cal-card">
-        <div class="cal-card__top">
-          <h2>Events across Minnesota</h2>
-          <ul class="cal-legend">
-            {
-              legend.map((l) => (
-                <li>
-                  <span class="dot" style={`background:${l.color}`} />
-                  {l.name}
-                </li>
-              ))
-            }
-          </ul>
-        </div>
-        <CalendarEmbed
-          src={calUrl}
-          title="WCS Minnesota combined events calendar"
-          height={700}
-        />
-      </div>
+      <MonthCalendar
+        sources={calendarSources}
+        apiKey={apiKey}
+        fallbackSrc={fallbackSrc}
+      />
     </div>
   </article>
 </Base>
