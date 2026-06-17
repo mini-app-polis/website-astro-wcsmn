@@ -1,3 +1,10 @@
+## [2.0.2](https://github.com/mini-app-polis/website-astro-wcsmn/compare/v2.0.1...v2.0.2) (2026-06-17)
+
+
+### Bug Fixes
+
+* orgs in their own files ([4d4e81f](https://github.com/mini-app-polis/website-astro-wcsmn/commit/4d4e81f920ff5906dd8f64c2871d4ba93f4a95bb))
+
 ## [2.0.1](https://github.com/mini-app-polis/website-astro-wcsmn/compare/v2.0.0...v2.0.1) (2026-06-17)
 
 
