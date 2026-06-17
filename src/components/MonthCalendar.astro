@@ -40,6 +40,10 @@ const {
         <span aria-hidden="true">›</span>
       </button>
       <button class="mcal__today" data-mcal-today>Today</button>
+      <label class="mcal__toggle">
+        <input type="checkbox" data-mcal-pasttoggle />
+        Show past events
+      </label>
     </div>
     <ul class="cal-legend">
       {
@@ -113,6 +117,7 @@ const {
     const cache = new Map();
     let view = new Date();
     view = new Date(view.getFullYear(), view.getMonth(), 1);
+    let showPast = false;
 
     const todayKey = dayKeyFmt.format(new Date());
 
@@ -190,11 +195,19 @@ const {
       }
       for (const list of byDay.values()) list.sort((a, b) => startMs(a) - startMs(b));
 
-      const dayKeys = [...byDay.keys()].sort();
+      // Default: only today and later (YYYY-MM-DD strings compare correctly;
+      // todayKey is in the site's time zone). The "Show past events" toggle
+      // includes earlier days too.
+      const dayKeys = [...byDay.keys()]
+        .filter((k) => showPast || k >= todayKey)
+        .sort();
       window.__mcalEvents = [];
 
       if (dayKeys.length === 0) {
-        grid.innerHTML = '<p class="mcal__empty">No events scheduled this month.</p>';
+        const msg = showPast
+          ? 'No events this month.'
+          : 'No upcoming events this month.';
+        grid.innerHTML = `<p class="mcal__empty">${msg}</p>`;
         return;
       }
 
@@ -202,7 +215,7 @@ const {
       for (const key of dayKeys) {
         const d = new Date(key + 'T00:00:00Z');
         const dow = fmtSchedDow.format(d);
-        const num = Number(key.slice(8, 10));
+        const mmdd = `${key.slice(5, 7)}/${key.slice(8, 10)}`;
         const isToday = key === todayKey;
 
         const rows = byDay
@@ -226,7 +239,7 @@ const {
         html +=
           `<li class="mcal__day${isToday ? ' is-today' : ''}">` +
           `<div class="mcal__date"><span class="mcal__date-dow">${dow}</span>` +
-          `<span class="mcal__date-num">${num}</span></div>` +
+          `<span class="mcal__date-num">${mmdd}</span></div>` +
           `<div class="mcal__rows">${rows}</div></li>`;
       }
       html += '</ol>';
@@ -331,6 +344,10 @@ const {
       view = new Date(now.getFullYear(), now.getMonth(), 1);
       load();
     });
+    root.querySelector('[data-mcal-pasttoggle]').addEventListener('change', (e) => {
+      showPast = e.target.checked;
+      load(); // month data is cached; this just re-renders with the new filter
+    });
 
     load();
   })();
@@ -400,6 +417,22 @@ const {
     border-color: var(--color-blue);
     color: var(--color-blue);
   }
+  .mcal__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45ch;
+    margin-left: 0.5rem;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--color-muted);
+    cursor: pointer;
+    user-select: none;
+  }
+  .mcal__toggle input {
+    accent-color: var(--color-pink);
+    cursor: pointer;
+  }
   .mcal__status {
     margin: 0;
     padding: 1.25rem 1.4rem;
@@ -419,7 +452,7 @@ const {
   }
   .mcal__day {
     display: grid;
-    grid-template-columns: 4rem 1fr;
+    grid-template-columns: 4.5rem 1fr;
     gap: 1rem;
     padding: 1rem 1.4rem;
     border-top: 1px solid var(--color-border);
@@ -445,17 +478,14 @@ const {
   .mcal__date-num {
     font-family: var(--font-display);
     font-weight: 900;
-    font-size: 1.6rem;
-    line-height: 1.1;
+    font-size: 1.15rem;
+    line-height: 1.2;
   }
   .mcal__day.is-today .mcal__date-num {
     background: var(--color-pink);
     color: #fff;
-    width: 2.3rem;
-    height: 2.3rem;
-    display: grid;
-    place-items: center;
-    border-radius: 50%;
+    padding: 0.1rem 0.45rem;
+    border-radius: 0.5rem;
   }
   .mcal__rows {
     display: flex;
@@ -506,7 +536,7 @@ const {
   }
   @media (max-width: 600px) {
     .mcal__day {
-      grid-template-columns: 3rem 1fr;
+      grid-template-columns: 3.6rem 1fr;
       gap: 0.75rem;
       padding: 0.85rem 1rem;
     }
