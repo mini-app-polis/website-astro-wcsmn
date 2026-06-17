@@ -1,0 +1,76 @@
+---
+import Base from '../../layouts/Base.astro';
+import CalendarEmbed from '../../components/CalendarEmbed.astro';
+import { getOrganizations, getOrganization } from '../../lib/data';
+import { singleCalendarUrl } from '../../lib/calendar';
+
+export async function getStaticPaths() {
+  const orgs = await getOrganizations();
+  return orgs.map((org) => ({ params: { slug: org.slug } }));
+}
+
+const { slug } = Astro.params;
+const org = await getOrganization(slug!);
+if (!org) {
+  return Astro.redirect('/organizations/');
+}
+
+const calUrl = org.calendarId
+  ? singleCalendarUrl({
+      calendarId: org.calendarId,
+      color: org.calendarColor,
+      title: org.name,
+      mode: 'AGENDA',
+    })
+  : null;
+---
+
+<Base title={org.name} description={org.blurb}>
+  <header class="page-header region">
+    <div class="wrapper">
+      <h1>{org.name}</h1>
+    </div>
+  </header>
+
+  <article class="region" style="padding-top:0">
+    <div class="wrapper prose flow">
+      <p>{org.blurb}</p>
+
+      {
+        org.links.length > 0 && (
+          <p class="org-links">
+            {org.links.map((link, i) => (
+              <>
+                {i > 0 && <span aria-hidden="true"> · </span>}
+                <a href={link.url}>{link.label}</a>
+              </>
+            ))}
+          </p>
+        )
+      }
+
+      {calUrl && (
+        <CalendarEmbed
+          src={calUrl}
+          title={`${org.name} event calendar`}
+          height={700}
+        />
+      )}
+
+      {org.bodyHtml && <div class="org-body" set:html={org.bodyHtml} />}
+    </div>
+  </article>
+</Base>
+
+<style>
+  .page-header {
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .org-links {
+    font-weight: 600;
+  }
+  .org-body {
+    margin-top: 2rem;
+  }
+</style>

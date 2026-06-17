@@ -1,0 +1,215 @@
+/* ─────────────────────────────────────────────────────────────
+   WCS MN — global styles.
+   Brand tokens carried over from the original site's design tokens:
+   pink #dd4462, blue #4467dd, gold #fbbe25, gray scale, with
+   Red Hat Display (display) + Atkinson Hyperlegible (body).
+   ───────────────────────────────────────────────────────────── */
+
+:root {
+  --color-pink: #dd4462;
+  --color-pink-subdued: #ce5769;
+  --color-blue: #4467dd;
+  --color-blue-subdued: #4d6cc8;
+  --color-gold: #fbbe25;
+  --color-gold-subdued: #f1c15b;
+
+  --gray-100: #f8f8f8;
+  --gray-200: #e4e4e4;
+  --gray-300: #aeaeae;
+  --gray-400: #808080;
+  --gray-500: #636363;
+  --gray-600: #484848;
+  --gray-700: #3a3a3a;
+  --gray-800: #2e2e2e;
+  --gray-900: #161616;
+
+  --color-primary: var(--color-pink);
+  --color-bg: var(--gray-100);
+  --color-surface: #ffffff;
+  --color-text: var(--gray-800);
+  --color-muted: var(--gray-500);
+  --color-border: var(--gray-200);
+
+  --font-display: 'Red Hat Display', 'Segoe UI', Roboto, 'Helvetica Neue',
+    Arial, sans-serif;
+  --font-body: 'Atkinson Hyperlegible', system-ui, sans-serif;
+
+  --wrapper: 72rem;
+  --radius: 0.75rem;
+  --space: 1.25rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: var(--gray-900);
+    --color-surface: var(--gray-800);
+    --color-text: var(--gray-100);
+    --color-muted: var(--gray-300);
+    --color-border: var(--gray-700);
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.6;
+  font-size: 1.05rem;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  line-height: 1.15;
+  font-weight: 700;
+}
+
+h1 {
+  font-size: clamp(2rem, 1.4rem + 3vw, 3.25rem);
+}
+h2 {
+  font-size: clamp(1.5rem, 1.2rem + 1.5vw, 2.1rem);
+  margin-top: 2.5rem;
+}
+h3 {
+  font-size: clamp(1.2rem, 1.05rem + 0.8vw, 1.5rem);
+  margin-top: 1.75rem;
+}
+
+a {
+  color: var(--color-blue);
+  text-underline-offset: 0.15em;
+}
+a:hover {
+  color: var(--color-pink);
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+.wrapper {
+  max-width: var(--wrapper);
+  margin-inline: auto;
+  padding-inline: var(--space);
+}
+
+.region {
+  padding-block: clamp(2rem, 1.5rem + 3vw, 4rem);
+}
+
+.flow > * + * {
+  margin-top: 1rem;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--color-primary);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  z-index: 100;
+}
+.skip-link:focus {
+  left: 0;
+}
+
+/* Buttons */
+.button {
+  display: inline-block;
+  background: var(--color-primary);
+  color: #fff;
+  padding: 0.7rem 1.4rem;
+  border: 0;
+  border-radius: var(--radius);
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.button:hover,
+.button:focus-visible {
+  background: var(--gray-900);
+  color: #fff;
+}
+.button:focus-visible {
+  outline: 3px solid var(--color-gold);
+  outline-offset: 2px;
+}
+
+/* Calendar embeds */
+.calendar-embed {
+  margin-top: 1rem;
+  border: 0;
+  width: 100%;
+  height: 700px;
+}
+.calendar-embed--home {
+  height: 700px;
+}
+
+/* Org grid */
+.org-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+  gap: 1.25rem;
+  margin-top: 2rem;
+  padding: 0;
+  list-style: none;
+}
+.org-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+}
+.org-card h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+}
+.org-card p {
+  margin: 0 0 1rem;
+  color: var(--color-muted);
+  font-size: 0.97rem;
+}
+
+/* Prose container for long-form org bodies and static pages */
+.prose :where(ul, ol) {
+  padding-left: 1.25rem;
+}
+.prose :where(h2, h3) {
+  margin-top: 2rem;
+}
+.prose hr {
+  border: 0;
+  border-top: 1px solid var(--color-border);
+  margin: 2rem 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

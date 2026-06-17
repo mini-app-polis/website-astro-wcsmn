@@ -1,0 +1,17 @@
+---
+interface Props {
+  src: string;
+  title: string;
+  height?: number;
+}
+const { src, title, height = 700 } = Astro.props;
+---
+
+<iframe
+  class="calendar-embed"
+  src={src}
+  title={title}
+  style={`height:${height}px;`}
+  loading="lazy"
+  frameborder="0"
+  scrolling="no"></iframe>

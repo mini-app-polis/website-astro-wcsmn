@@ -1,0 +1,30 @@
+---
+import Base from './Base.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+const { title, description } = Astro.props;
+---
+
+<Base title={title} description={description}>
+  <header class="page-header region">
+    <div class="wrapper">
+      <h1>{title}</h1>
+    </div>
+  </header>
+  <article class="region" style="padding-top:0">
+    <div class="wrapper prose flow">
+      <slot />
+    </div>
+  </article>
+</Base>
+
+<style>
+  .page-header {
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    padding-block: clamp(1.5rem, 1rem + 2vw, 3rem);
+  }
+</style>

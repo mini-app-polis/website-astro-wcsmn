@@ -1,0 +1,52 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getOrganizations } from '../../lib/data';
+
+const orgs = await getOrganizations();
+---
+
+<Base
+  title="Organizations"
+  description="West Coast Swing organizations across Minnesota."
+>
+  <header class="page-header region">
+    <div class="wrapper">
+      <h1>Organizations</h1>
+      <p style="color:var(--color-muted);max-width:48rem">
+        West Coast Swing organizations across Minnesota. Select one to see its
+        details and event calendar.
+      </p>
+    </div>
+  </header>
+
+  <article class="region" style="padding-top:0">
+    <div class="wrapper">
+      <ul class="org-grid">
+        {
+          orgs.map((org) => (
+            <li class="org-card">
+              <h2>
+                <a href={`/organizations/${org.slug}/`}>{org.name}</a>
+              </h2>
+              <p>{org.blurb}</p>
+              <a
+                class="button"
+                href={`/organizations/${org.slug}/`}
+                style="font-size:0.9rem;padding:0.5rem 1rem"
+              >
+                View details
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </article>
+</Base>
+
+<style>
+  .page-header {
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+  }
+</style>
