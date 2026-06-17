@@ -1,3 +1,10 @@
+## [2.3.2](https://github.com/mini-app-polis/website-astro-wcsmn/compare/v2.3.1...v2.3.2) (2026-06-17)
+
+
+### Bug Fixes
+
+* mobile display ([7ded35a](https://github.com/mini-app-polis/website-astro-wcsmn/commit/7ded35a1d9b093abd1b8425c865047ac3c2613d6))
+
 ## [2.3.1](https://github.com/mini-app-polis/website-astro-wcsmn/compare/v2.3.0...v2.3.1) (2026-06-17)
 
 
