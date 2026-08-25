@@ -13,7 +13,12 @@
 // ─────────────────────────────────────────────────────────────
 
 import { organizations } from '../data/organizations';
-import type { Organization, CombinedCalendarSource } from './types';
+import { siteCalendars } from '../data/site-calendars';
+import type {
+  Organization,
+  CombinedCalendarSource,
+  SiteCalendar,
+} from './types';
 
 // Fallback event color for any org that has a calendar but no color set.
 const DEFAULT_CALENDAR_COLOR = '#4467dd';
@@ -31,21 +36,39 @@ export async function getOrganization(
 }
 
 /**
+ * Community-wide calendars that belong to no single organization.
+ *
+ * These are additional sources for the homepage calendar only — they are not
+ * organizations, so they get no detail page and never appear in the org list
+ * or navigation.
+ */
+export async function getSiteCalendars(): Promise<SiteCalendar[]> {
+  return siteCalendars;
+}
+
+/**
  * Sources for the combined homepage calendar embed.
  *
- * Derived from the orgs: every organization that has a calendarId contributes
- * one source, in org display order, using its own calendarColor. Add or remove
- * an org (or change its calendar/color) and the homepage updates automatically.
- * There is no separate hand-maintained source list.
+ * The site-level calendars come first, followed by every organization that
+ * has a calendarId, in org display order, using its own calendarColor. Add or
+ * remove an org (or change its calendar/color) and the homepage updates
+ * automatically. There is no separate hand-maintained source list.
  */
 export async function getCombinedCalendarSources(): Promise<
   CombinedCalendarSource[]
 > {
+  const site = await getSiteCalendars();
   const orgs = await getOrganizations();
-  return orgs
-    .filter((o) => o.calendarId !== null)
-    .map((o) => ({
-      calendarId: o.calendarId as string,
-      color: o.calendarColor ?? DEFAULT_CALENDAR_COLOR,
-    }));
+  return [
+    ...site.map((c) => ({
+      calendarId: c.calendarId,
+      color: c.color,
+    })),
+    ...orgs
+      .filter((o) => o.calendarId !== null)
+      .map((o) => ({
+        calendarId: o.calendarId as string,
+        color: o.calendarColor ?? DEFAULT_CALENDAR_COLOR,
+      })),
+  ];
 }

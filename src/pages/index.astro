@@ -1,7 +1,11 @@
 ---
 import Base from '../layouts/Base.astro';
 import MonthCalendar from '../components/MonthCalendar.astro';
-import { getCombinedCalendarSources, getOrganizations } from '../lib/data';
+import {
+  getCombinedCalendarSources,
+  getOrganizations,
+  getSiteCalendars,
+} from '../lib/data';
 import { combinedCalendarUrl } from '../lib/calendar';
 
 const combined = await getCombinedCalendarSources();
@@ -13,15 +17,24 @@ const fallbackSrc = combinedCalendarUrl({
   height: 800,
 });
 
-// Calendar sources for the custom month grid: id + color + org name.
+// Calendar sources for the custom month grid: id + color + display name.
+// Community-wide calendars lead, then one source per org with a calendar.
+const siteCalendars = await getSiteCalendars();
 const orgs = await getOrganizations();
-const calendarSources = orgs
-  .filter((o) => o.calendarId !== null)
-  .map((o) => ({
-    id: o.calendarId as string,
-    color: o.calendarColor ?? '#4467dd',
-    name: o.name,
-  }));
+const calendarSources = [
+  ...siteCalendars.map((c) => ({
+    id: c.calendarId,
+    color: c.color,
+    name: c.name,
+  })),
+  ...orgs
+    .filter((o) => o.calendarId !== null)
+    .map((o) => ({
+      id: o.calendarId as string,
+      color: o.calendarColor ?? '#4467dd',
+      name: o.name,
+    })),
+];
 
 // Public, referrer-restricted Google Calendar API key (client-side fetch).
 const apiKey = import.meta.env.PUBLIC_GOOGLE_CALENDAR_API_KEY ?? '';

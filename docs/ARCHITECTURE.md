@@ -11,6 +11,7 @@ Every page reads data through one module, `src/lib/data.ts`:
 
 - `getOrganizations()` → all organizations, in display order
 - `getOrganization(slug)` → one organization, or `null`
+- `getSiteCalendars()` → community-wide calendars that belong to no org
 - `getCombinedCalendarSources()` → the calendar sources for the homepage
 
 Pages **never** import the seed data directly. Three rules keep the future
@@ -75,6 +76,17 @@ The calendar sources are **derived from the organizations** — every org with a
 `calendarId` contributes one color-coded source, in display order. There is no
 separate hand-maintained source list, so adding or removing an org (or changing
 its calendar/color) updates the calendar automatically.
+
+### Site-level calendars
+
+Some events belong to the community rather than to one organization. Those live
+on shared calendars listed in `src/data/site-calendars.ts` as `SiteCalendar`
+records (`{ id, name, calendarId, color }`), served by `getSiteCalendars()`.
+
+They join the homepage's combined view ahead of the org sources and get their
+own legend entry, but they are **not organizations**: no `/organizations/<slug>/`
+page, no entry in the org list or navigation. Today there is one — the shared
+`minnesota.wcs@gmail.com` calendar contributors are asked to invite.
 
 ### Homepage: custom month calendar
 

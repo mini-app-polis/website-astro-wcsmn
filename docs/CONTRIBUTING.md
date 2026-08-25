@@ -14,15 +14,14 @@ event on the calendar:
 2. It will appear on that org's page and on the homepage's combined calendar
    automatically.
 
-If you're not affiliated with an organization, or you're not sure where an
-event belongs, use the [Contact page](https://wcsmn.com/contact/) and we'll
-help place it.
+If the event does not belong to a single organization, invite
+`minnesota.wcs@gmail.com` — the shared **WCS MN Community** calendar. It is a
+site-level source on the homepage calendar (see
+[Site-level calendars](ARCHITECTURE.md#site-level-calendars)), so events there
+show up alongside the org calendars.
 
-> Maintainer note: the `/contributions/add-event/` page currently asks people
-> to invite `minnesota.wcs@gmail.com`. That aggregate calendar is **no longer**
-> one of the homepage sources (the homepage now shows only the per-org
-> calendars), so events sent only there will not appear. This page should be
-> updated — see [Known doc/site follow-ups](#known-docsite-follow-ups).
+If you're not sure where an event belongs, use the
+[Contact page](https://wcsmn.com/contact/) and we'll help place it.
 
 ### Adding an organization
 
@@ -117,10 +116,6 @@ your first change.
 These are content/site inconsistencies surfaced during the docs review, kept
 here so they aren't lost:
 
-- **Add-event target is stale.** `/contributions/add-event/` points at
-  `minnesota.wcs@gmail.com`, which is no longer a homepage calendar source.
-  Decide whether to re-add that aggregate, point contributors at a specific
-  org calendar, or rewrite the instructions.
 - **Old repo URL in pages.** `how-to-contribute.astro` and `contributors.astro`
   link to `github.com/kaianolevine/wcsmn.com`; the active repo is
   `github.com/mini-app-polis/website-astro-wcsmn`.

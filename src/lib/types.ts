@@ -22,6 +22,26 @@ export interface CombinedCalendarSource {
   color: string;
 }
 
+/**
+ * A calendar owned by the community as a whole rather than by one
+ * organization — e.g. the shared "West Coast Swing MN" calendar that
+ * contributors invite when an event does not belong to a specific org.
+ *
+ * Site calendars join the homepage's combined view exactly like an org's
+ * calendar does, but they are not organizations: they have no detail page
+ * and never appear in the org list or navigation.
+ */
+export interface SiteCalendar {
+  /** Stable identifier, e.g. "community". */
+  id: string;
+  /** Display name shown in the homepage calendar legend. */
+  name: string;
+  /** Google Calendar ID. */
+  calendarId: string;
+  /** Hex color (with leading #) used for this calendar's events. */
+  color: string;
+}
+
 export interface OrgLink {
   /** Visible label, e.g. "Website", "Facebook", "Instagram". */
   label: string;
