@@ -1,3 +1,10 @@
+## [2.4.1](https://github.com/mini-app-polis/website-astro-wcsmn/compare/v2.4.0...v2.4.1) (2026-09-10)
+
+
+### Bug Fixes
+
+* **deps:** pin astro, @astrojs/sitemap and @astrojs/check to exact versions ([17fc204](https://github.com/mini-app-polis/website-astro-wcsmn/commit/17fc204dc34204cdb46e0605da18aaae715fe330))
+
 # [2.4.0](https://github.com/mini-app-polis/website-astro-wcsmn/compare/v2.3.2...v2.4.0) (2026-08-25)
 
 
