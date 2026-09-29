@@ -1,0 +1,41 @@
+# Time-boxed ignores for advisories that cannot be fixed from this repo.
+#
+# All of these sit in dependencies *bundled* inside the `npm` package
+# (node_modules/npm/node_modules/*), which arrives via semantic-release ->
+# @semantic-release/npm. Bundled dependencies ship inside npm's own tarball,
+# so neither a lockfile update nor `overrides` can reach them. As of
+# 2026-09-29 no npm release bundles the fixed versions — 11.20.0 (newest in
+# the ^11 range @semantic-release/npm allows) and 12.1.0 both still ship
+# undici 6.28.0 and ip-address 10.5.0.
+#
+# Exposure: dev-only, and the npm CLI runs only in the release job on main.
+# Nothing here reaches the built site.
+#
+# To clear: once an npm 11.x ships undici >= 6.28.1 and ip-address >= 10.5.1,
+# run `npm update npm` and delete this file. `ignoreUntil` makes the scan
+# fail again on that date if nobody has, so this cannot go stale silently.
+
+[[IgnoredVulns]]
+id = "GHSA-2vr4-cq9g-pvrc"
+ignoreUntil = 2026-10-29
+reason = "ip-address 10.5.0 bundled inside npm (dev, release job only); no npm release ships 10.5.1 yet"
+
+[[IgnoredVulns]]
+id = "GHSA-rpw4-54j3-4h4q"
+ignoreUntil = 2026-10-29
+reason = "ip-address 10.5.0 bundled inside npm (dev, release job only); no npm release ships 10.5.1 yet"
+
+[[IgnoredVulns]]
+id = "GHSA-3wwx-pv8p-q78v"
+ignoreUntil = 2026-10-29
+reason = "undici 6.28.0 bundled inside npm (dev, release job only); no npm release ships 6.28.1 yet"
+
+[[IgnoredVulns]]
+id = "GHSA-rfgv-xxqx-mfg5"
+ignoreUntil = 2026-10-29
+reason = "undici 6.28.0 bundled inside npm (dev, release job only); no npm release ships 6.28.1 yet"
+
+[[IgnoredVulns]]
+id = "GHSA-r53p-7pc4-xj5r"
+ignoreUntil = 2026-10-29
+reason = "undici 6.28.0 bundled inside npm (dev, release job only); no npm release ships 6.28.1 yet"
