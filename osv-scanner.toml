@@ -1,6 +1,6 @@
 # Time-boxed ignores for advisories that cannot be fixed from this repo.
 #
-# All three sit in dependencies *bundled* inside the `npm` package
+# All of these sit in dependencies *bundled* inside the `npm` package
 # (node_modules/npm/node_modules/*), which arrives via semantic-release ->
 # @semantic-release/npm. Bundled dependencies ship inside npm's own tarball,
 # so neither a lockfile update nor `overrides` can reach them. As of
@@ -27,5 +27,15 @@ reason = "ip-address 10.5.0 bundled inside npm (dev, release job only); no npm r
 
 [[IgnoredVulns]]
 id = "GHSA-3wwx-pv8p-q78v"
+ignoreUntil = 2026-10-29
+reason = "undici 6.28.0 bundled inside npm (dev, release job only); no npm release ships 6.28.1 yet"
+
+[[IgnoredVulns]]
+id = "GHSA-rfgv-xxqx-mfg5"
+ignoreUntil = 2026-10-29
+reason = "undici 6.28.0 bundled inside npm (dev, release job only); no npm release ships 6.28.1 yet"
+
+[[IgnoredVulns]]
+id = "GHSA-r53p-7pc4-xj5r"
 ignoreUntil = 2026-10-29
 reason = "undici 6.28.0 bundled inside npm (dev, release job only); no npm release ships 6.28.1 yet"
