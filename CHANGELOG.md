@@ -1,3 +1,11 @@
+## [2.4.4](https://github.com/mini-app-polis/website-astro-wcsmn/compare/v2.4.3...v2.4.4) (2026-10-03)
+
+
+### Bug Fixes
+
+* **deps:** patch devalue and fast-uri; time-box the http-cache-semantics advisory ([064e272](https://github.com/mini-app-polis/website-astro-wcsmn/commit/064e2726a2c7b5bc2b565b708bd17d10714fe78d))
+* **release:** let Cloudflare Pages build the release commit ([9fbcd90](https://github.com/mini-app-polis/website-astro-wcsmn/commit/9fbcd9020bf89b11a1c41132d458aa1ad192ab92))
+
 ## [2.4.3](https://github.com/mini-app-polis/website-astro-wcsmn/compare/v2.4.2...v2.4.3) (2026-09-28)
 
 
