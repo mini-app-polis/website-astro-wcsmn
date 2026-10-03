@@ -26,14 +26,14 @@ version, git tag, GitHub release, and `CHANGELOG.md` are derived from them.
 - `.github/workflows/release.yml` — runs on push to `main`, Node 22 (required
   by semantic-release v25), using the default `GITHUB_TOKEN`.
 
-## Why there's no `[skip ci]`
+## Why `[skip actions]`, not `[skip ci]`
 
-The release commit is **not** marked `[skip ci]`. That's deliberate:
+The release commit is marked `[skip actions]` (ecosystem-standards VER-009):
 
-- The release commit is pushed with the automatic `GITHUB_TOKEN`, and GitHub
-  does not trigger workflows from `GITHUB_TOKEN` pushes — so the release
-  workflow doesn't loop.
-- But Cloudflare Pages watches the repo independently and **does** deploy that
+- It stops GitHub Actions from running the pipeline again on the release
+  commit, which would find nothing to release.
+- Cloudflare Pages watches the repo independently and skips commits marked
+  `[skip ci]`, but not `[skip actions]`, so it **does** deploy the release
   commit. We need it to, because the deployed footer version comes from
   `package.json`, which the release commit updates.
 
