@@ -1,3 +1,10 @@
+## [2.4.5](https://github.com/mini-app-polis/website-astro-wcsmn/compare/v2.4.4...v2.4.5) (2026-10-08)
+
+
+### Bug Fixes
+
+* **deps:** bump sharp, source-map-js for security advisories ([6b3068d](https://github.com/mini-app-polis/website-astro-wcsmn/commit/6b3068d5d7f2b66724a6d50469bbcbc74851f1b5))
+
 ## [2.4.4](https://github.com/mini-app-polis/website-astro-wcsmn/compare/v2.4.3...v2.4.4) (2026-10-03)
 
 
