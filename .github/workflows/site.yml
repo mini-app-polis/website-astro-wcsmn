@@ -10,7 +10,8 @@ name: site
 #   - carries the Google Calendar key (PUBLIC_GOOGLE_CALENDAR_API_KEY). It is
 #     baked in from the Pages settings at build time, and without it the
 #     build succeeds and ships a home page whose calendar is silently empty;
-#   - posts the contact form to the API, and that API answers /health.
+#   - serves a contact form whose action targets the API (checked in the
+#     page's HTML; nothing is submitted), and that API answers /health.
 # All of it is read-only, so it is safe against production.
 #
 # The site has no identity provider, so there is no key to check for its
