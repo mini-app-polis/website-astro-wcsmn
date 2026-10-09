@@ -1,0 +1,97 @@
+name: site
+
+# Smoke-tests the site once Cloudflare Pages has deployed a push to dev or
+# main (CD-032). Pages builds on its own, outside Actions, and reports
+# through the "Cloudflare Pages" check on the commit; this waits for that
+# check and tests the deploy's own preview URL (<hash>.<project>.pages.dev) —
+# exactly this commit's build, so a cache can't pass a stale one. It makes
+# sure the build:
+#   - serves the home page, deep links, and the sitemap robots.txt names;
+#   - carries the Google Calendar key (PUBLIC_GOOGLE_CALENDAR_API_KEY). It is
+#     baked in from the Pages settings at build time, and without it the
+#     build succeeds and ships a home page whose calendar is silently empty;
+#   - posts the contact form to the API, and that API answers /health.
+# All of it is read-only, so it is safe against production.
+#
+# The site has no identity provider, so there is no key to check for its
+# environment. The contact form's API is the production API in both
+# environments — src/pages/contact.astro names it outright, and there is no
+# development wiring — so both runs check that one.
+#
+# It runs on pushes. Not on the promotion pull request to main: its head is
+# dev's latest commit, already tested by the push run, whose result the pull
+# request shows. semantic-release's own commit to main is marked
+# [skip actions], so a release is checked once, at the merge.
+# Modelled on deejaytools-com's site.yml.
+
+on:
+  push:
+    branches: [dev, main]
+
+permissions:
+  contents: read
+  checks: read
+
+concurrency:
+  group: site-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  API: https://api.kaianolevine.com
+  SHA: ${{ github.sha }}
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Wait for Cloudflare Pages to deploy this commit
+        id: deploy
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          check() {
+            gh api "repos/$GITHUB_REPOSITORY/commits/$SHA/check-runs?check_name=Cloudflare%20Pages" --jq "$1"
+          }
+          for _ in $(seq 1 60); do
+            read -r status conclusion <<<"$(check '.check_runs[0] // {} | "\(.status // "missing") \(.conclusion // "")"')"
+            if [ "$status" = completed ]; then
+              if [ "$conclusion" = success ]; then
+                # The check's summary lists the deploy's own preview URL
+                # (<8-hex-hash>.<project>.pages.dev) before the branch alias.
+                url=$(check '.check_runs[0].output.summary' | grep -oE 'https://[0-9a-f]{8}\.[a-z0-9-]+\.pages\.dev' | head -n 1 || true)
+                if [ -z "$url" ]; then echo "::error::The Cloudflare Pages check did not report a preview URL."; exit 1; fi
+                echo "Deployed at $url."
+                echo "site=$url" >> "$GITHUB_OUTPUT"
+                exit 0
+              fi
+              echo "::error::The Cloudflare Pages deploy of $SHA concluded '$conclusion'."
+              exit 1
+            fi
+            sleep 15
+          done
+          echo "::error::No finished Cloudflare Pages deploy for $SHA after 15 minutes."
+          exit 1
+
+      - name: Smoke-test the site
+        env:
+          SITE: ${{ steps.deploy.outputs.site }}
+        run: |
+          set -euo pipefail
+          fail() { echo "::error::$1"; exit 1; }
+          get() { curl -fsSL --retry 3 "$SITE$1"; }
+
+          html=$(get /) || fail "$SITE/ did not load."
+          # A Google API key: AIza plus 35 characters, inlined by define:vars.
+          grep -qE 'AIza[0-9A-Za-z_-]{35}' <<<"$html" \
+            || fail "$SITE/ carries no Google Calendar API key — PUBLIC_GOOGLE_CALENDAR_API_KEY is unset in Pages."
+
+          for path in /organizations/ /faq/ /contributions/ /sitemap-index.xml; do
+            get "$path" >/dev/null || fail "$SITE$path did not load."
+          done
+
+          contact=$(get /contact/) || fail "$SITE/contact/ did not load."
+          grep -qF "action=\"$API/v1/contact\"" <<<"$contact" \
+            || fail "The contact form does not post to $API/v1/contact."
+          curl -fsS -o /dev/null --retry 3 "$API/health" || fail "$API/health did not answer."
+          echo "Site OK at $SITE (contact form posts to $API)"
