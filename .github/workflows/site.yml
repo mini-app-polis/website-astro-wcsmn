@@ -85,7 +85,7 @@ jobs:
           html=$(get /) || fail "$SITE/ did not load."
           # A Google API key: AIza plus 35 characters, inlined by define:vars.
           grep -qE 'AIza[0-9A-Za-z_-]{35}' <<<"$html" \
-            || fail "$SITE/ carries no Google Calendar API key — GOOGLE_CALENDAR_PUBLIC_API_KEY is unset in Pages."
+            || fail "$SITE/ carries no Google Calendar API key — set GOOGLE_CALENDAR_PUBLIC_API_KEY in Doppler (prd), apply infra, then rebuild."
 
           for path in /organizations/ /faq/ /contributions/ /sitemap-index.xml; do
             get "$path" >/dev/null || fail "$SITE$path did not load."
