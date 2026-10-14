@@ -7,7 +7,7 @@ name: site
 # exactly this commit's build, so a cache can't pass a stale one. It makes
 # sure the build:
 #   - serves the home page, deep links, and the sitemap robots.txt names;
-#   - carries the Google Calendar key (PUBLIC_GOOGLE_CALENDAR_API_KEY). It is
+#   - carries the Google Calendar key (GOOGLE_CALENDAR_PUBLIC_API_KEY). It is
 #     baked in from the Pages settings at build time, and without it the
 #     build succeeds and ships a home page whose calendar is silently empty;
 #   - serves a contact form whose action targets the API (checked in the
@@ -85,7 +85,7 @@ jobs:
           html=$(get /) || fail "$SITE/ did not load."
           # A Google API key: AIza plus 35 characters, inlined by define:vars.
           grep -qE 'AIza[0-9A-Za-z_-]{35}' <<<"$html" \
-            || fail "$SITE/ carries no Google Calendar API key — PUBLIC_GOOGLE_CALENDAR_API_KEY is unset in Pages."
+            || fail "$SITE/ carries no Google Calendar API key — GOOGLE_CALENDAR_PUBLIC_API_KEY is unset in Pages."
 
           for path in /organizations/ /faq/ /contributions/ /sitemap-index.xml; do
             get "$path" >/dev/null || fail "$SITE$path did not load."
