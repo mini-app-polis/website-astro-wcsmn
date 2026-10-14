@@ -42,7 +42,7 @@ jobs:
           # Consumed at build time through import.meta.env and baked into the
           # client bundle. The page falls back to '' rather than failing, so a
           # missing value ships a site whose calendar is silently empty.
-          PUBLIC_GOOGLE_CALENDAR_API_KEY: ${{ vars.PUBLIC_GOOGLE_CALENDAR_API_KEY }}
+          GOOGLE_CALENDAR_PUBLIC_API_KEY: ${{ vars.GOOGLE_CALENDAR_PUBLIC_API_KEY }}
         run: npm run build
 
   release:

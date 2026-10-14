@@ -17,7 +17,7 @@ npm run preview  # preview the production build
 Requires Node 20+. The build produces a fully static `dist/` — no server.
 
 The homepage calendar fetches events live from the Google Calendar API. Copy
-`.env.example` to `.env` and set `PUBLIC_GOOGLE_CALENDAR_API_KEY` to see it
+`.env.example` to `.env` and set `GOOGLE_CALENDAR_PUBLIC_API_KEY` to see it
 locally; without it the calendar shows a notice and falls back to the Google
 embed. See [docs/DEPLOY.md](docs/DEPLOY.md#google-calendar-api-key-setup).
 

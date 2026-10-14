@@ -20,11 +20,11 @@ canonical URLs) and `@astrojs/sitemap` emits `/sitemap-index.xml`, which
 
 | Variable | Used for |
 | --- | --- |
-| `PUBLIC_GOOGLE_CALENDAR_API_KEY` | The homepage custom calendar fetches events from the Google Calendar API with this key. **Set it in Cloudflare Pages** (and locally in `.env`). |
+| `GOOGLE_CALENDAR_PUBLIC_API_KEY` | The homepage custom calendar fetches events from the Google Calendar API with this key. **Set it in Cloudflare Pages** (and locally in `.env`). |
 | `CF_PAGES_BRANCH` | Footer version: `main` shows the release version; other branches show `dev@<branch>`. Set automatically by Cloudflare. |
 | `CF_PAGES_COMMIT_SHA` | Short SHA in the footer. Set automatically by Cloudflare. |
 
-Only `PUBLIC_GOOGLE_CALENDAR_API_KEY` needs manual setup; the `CF_PAGES_*` vars
+Only `GOOGLE_CALENDAR_PUBLIC_API_KEY` needs manual setup; the `CF_PAGES_*` vars
 are provided by Cloudflare. See `src/lib/build.ts` and [RELEASING.md](RELEASING.md).
 
 ### Google Calendar API key setup
@@ -38,7 +38,7 @@ browser key). Lock it down in the Google Cloud Console:
    - API restriction → Google Calendar API only.
 2. Each organization's Google Calendar must be **public** ("Make available to
    public") for its events to be readable.
-3. Add the key as `PUBLIC_GOOGLE_CALENDAR_API_KEY` in Cloudflare Pages →
+3. Add the key as `GOOGLE_CALENDAR_PUBLIC_API_KEY` in Cloudflare Pages →
    Settings → Environment variables (Production and Preview).
 
 Without the key the homepage shows a graceful notice and the `<noscript>`

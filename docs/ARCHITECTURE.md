@@ -93,7 +93,7 @@ page, no entry in the org list or navigation. Today there is one — the shared
 The homepage uses `components/MonthCalendar.astro`, a custom client-side
 **per-month schedule (agenda) view** that fetches events live from the **Google
 Calendar API** (a public, referrer-restricted key in
-`PUBLIC_GOOGLE_CALENDAR_API_KEY`). It lists the month's days that have events in
+`GOOGLE_CALENDAR_PUBLIC_API_KEY`). It lists the month's days that have events in
 chronological order, each event color-coded by org with time, title, and org
 name, plus prev/next/today navigation and a click-to-open details popover —
 full control of the UI, no Google chrome or "+ Google Calendar" button. Google
