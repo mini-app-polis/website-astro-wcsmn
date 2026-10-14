@@ -1,3 +1,10 @@
+## [2.4.6](https://github.com/mini-app-polis/website-astro-wcsmn/compare/v2.4.5...v2.4.6) (2026-10-14)
+
+
+### Bug Fixes
+
+* **build:** read the calendar key as GOOGLE_CALENDAR_PUBLIC_API_KEY ([cba130d](https://github.com/mini-app-polis/website-astro-wcsmn/commit/cba130dba27dc3a7abd78adaf29f5e84e21ca6d9))
+
 ## [2.4.5](https://github.com/mini-app-polis/website-astro-wcsmn/compare/v2.4.4...v2.4.5) (2026-10-08)
 
 
