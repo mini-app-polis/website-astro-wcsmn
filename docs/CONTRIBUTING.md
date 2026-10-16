@@ -116,6 +116,6 @@ your first change.
 These are content/site inconsistencies surfaced during the docs review, kept
 here so they aren't lost:
 
-- **Old repo URL in pages.** `how-to-contribute.astro` and `contributors.astro`
-  link to `github.com/kaianolevine/wcsmn.com`; the active repo is
+- **Old repo URL in pages.** `how-to-contribute.astro` links to
+  `github.com/kaianolevine/wcsmn.com`; the active repo is
   `github.com/mini-app-polis/website-astro-wcsmn`.

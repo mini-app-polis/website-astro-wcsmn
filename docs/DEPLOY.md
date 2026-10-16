@@ -9,7 +9,7 @@ The site is a static Astro build deployed to Cloudflare Pages.
 | Framework preset | **Astro** |
 | Build command | `npm run build` |
 | Build output directory | `dist` |
-| Node version | 20+ |
+| Node version | 22.12+ (`.nvmrc` pins 22) |
 | Production branch | `main` |
 
 `astro.config.mjs` sets `site: 'https://wcsmn.com'` (used for the sitemap and
