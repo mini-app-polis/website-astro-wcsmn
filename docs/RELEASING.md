@@ -8,8 +8,8 @@ version, git tag, GitHub release, and `CHANGELOG.md` are derived from them.
 ## How a release happens
 
 1. You merge commits to `main` (e.g. a `feat:` or `fix:`).
-2. The `release` GitHub Action (`.github/workflows/release.yml`) runs
-   semantic-release.
+2. The `release` job in `.github/workflows/ci.yml` runs semantic-release,
+   after the `test` and `security` jobs pass.
 3. semantic-release inspects the commits since the last tag and decides the
    next version:
    - `fix:` → patch, `feat:` → minor, `feat!:`/`BREAKING CHANGE:` → major.
@@ -23,7 +23,7 @@ version, git tag, GitHub release, and `CHANGELOG.md` are derived from them.
 - `.releaserc.json` — plugin pipeline: commit-analyzer → release-notes-generator
   → changelog → npm (`npmPublish: false`, this is a private site) → git →
   github.
-- `.github/workflows/release.yml` — runs on push to `main`, Node 22 (required
+- `.github/workflows/ci.yml` (`release` job) — runs on push to `main`, Node 22 (required
   by semantic-release v25), using the default `GITHUB_TOKEN`.
 
 ## Why `[skip actions]`, not `[skip ci]`

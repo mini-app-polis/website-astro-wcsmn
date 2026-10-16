@@ -3,10 +3,10 @@
 //
 // Mirrors the original Eleventy build.js. Runs at build time (Node), so it
 // reads Cloudflare Pages env vars and the package.json version that
-// release-please keeps in sync.
+// semantic-release keeps in sync.
 //
 //   - On the production branch (main): show the package.json version, which
-//     release-please bumps on each release.
+//     semantic-release bumps on each release.
 //   - On preview branches: show `dev@<branch>` so previews are obvious.
 //   - commit: short SHA of the deployed commit (or "local" off Cloudflare).
 // ─────────────────────────────────────────────────────────────
