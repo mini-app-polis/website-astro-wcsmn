@@ -1,3 +1,10 @@
+## [2.4.8](https://github.com/mini-app-polis/website-astro-wcsmn/compare/v2.4.7...v2.4.8) (2026-10-16)
+
+
+### Bug Fixes
+
+* **ci:** follow a newer branch deploy when Pages skips this commit's build ([0c84fcd](https://github.com/mini-app-polis/website-astro-wcsmn/commit/0c84fcdfb58ddd870bddcd470b25cfef5f98bfcb))
+
 ## [2.4.7](https://github.com/mini-app-polis/website-astro-wcsmn/compare/v2.4.6...v2.4.7) (2026-10-16)
 
 
