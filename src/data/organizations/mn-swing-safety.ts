@@ -47,7 +47,6 @@ Sam Stromwall (he/him)<br>
 Scott Jennen (he/him)<br>
 Talia Tan (she/her)<br>
 Taylor Jaquith (he/him)<br>
-Ted Peters (he/him)<br>
 Zach Gruenberg (he/him)
 </p>
 `.trim(),
