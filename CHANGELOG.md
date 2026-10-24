@@ -1,3 +1,12 @@
+## [2.4.9](https://github.com/mini-app-polis/website-astro-wcsmn/compare/v2.4.8...v2.4.9) (2026-10-24)
+
+
+### Bug Fixes
+
+* **calendar:** check the event popup's Google Calendar link with safeUrl() ([2c30fb7](https://github.com/mini-app-polis/website-astro-wcsmn/commit/2c30fb7029e850cb705b6fd404829a1a9123aeb5))
+* **deps:** patch zod, http-cache-semantics, fast-uri and undici ([b2cb874](https://github.com/mini-app-polis/website-astro-wcsmn/commit/b2cb87439348525468f8a2daa24bc3416473a487))
+* **security:** check the scheme of organisation links before rendering them ([461eb75](https://github.com/mini-app-polis/website-astro-wcsmn/commit/461eb7503f9918ad143e32c46df29dcfe1e9d283))
+
 ## [2.4.8](https://github.com/mini-app-polis/website-astro-wcsmn/compare/v2.4.7...v2.4.8) (2026-10-16)
 
 
