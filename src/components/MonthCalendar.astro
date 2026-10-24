@@ -29,7 +29,15 @@ const {
 } = Astro.props;
 ---
 
-<section class="mcal" data-mcal aria-label="WCS Minnesota events calendar">
+<section
+  class="mcal"
+  data-mcal
+  data-mcal-sources={JSON.stringify(sources)}
+  data-mcal-key={apiKey}
+  data-mcal-tz={timeZone}
+  data-mcal-fallback={fallbackSrc ?? ''}
+  aria-label="WCS Minnesota events calendar"
+>
   <div class="mcal__bar">
     <div class="mcal__nav">
       <button class="mcal__btn" data-mcal-prev aria-label="Previous month">
@@ -91,19 +99,59 @@ const {
   </div>
 </section>
 
-<script define:vars={{ sources, apiKey, timeZone, fallbackSrc }}>
+<script>
+  // A processed script, not define:vars: define:vars ships the script as
+  // is, so it could not import safeUrl(). The props it needs arrive as data-
+  // attributes on the root instead.
+  import { safeUrl } from '../lib/url';
+
+  interface CalendarSource {
+    id: string;
+    color: string;
+    name: string;
+  }
+  interface GoogleDate {
+    date?: string;
+    dateTime?: string;
+  }
+  interface GoogleEvent {
+    status?: string;
+    summary?: string;
+    location?: string;
+    description?: string;
+    htmlLink?: string;
+    start: GoogleDate;
+    end?: GoogleDate;
+  }
+  interface Item {
+    ev: GoogleEvent;
+    color: string;
+    org: string;
+  }
+
+  declare global {
+    interface Window {
+      __mcalEvents: Item[];
+    }
+  }
+
   (() => {
-    const root = document.querySelector('[data-mcal]');
+    const root = document.querySelector<HTMLElement>('[data-mcal]');
     if (!root) return;
 
-    const grid = root.querySelector('[data-mcal-grid]');
-    const titleEl = root.querySelector('[data-mcal-title]');
-    const statusEl = root.querySelector('[data-mcal-status]');
-    const backdrop = root.querySelector('[data-mcal-backdrop]');
-    const popBody = root.querySelector('[data-mcal-popbody]');
+    const sources: CalendarSource[] = JSON.parse(root.dataset.mcalSources || '[]');
+    const apiKey = root.dataset.mcalKey || '';
+    const timeZone = root.dataset.mcalTz || 'America/Chicago';
+    const fallbackSrc = root.dataset.mcalFallback || '';
+
+    const grid = root.querySelector<HTMLElement>('[data-mcal-grid]')!;
+    const titleEl = root.querySelector<HTMLElement>('[data-mcal-title]')!;
+    const statusEl = root.querySelector<HTMLElement>('[data-mcal-status]')!;
+    const backdrop = root.querySelector<HTMLElement>('[data-mcal-backdrop]')!;
+    const popBody = root.querySelector<HTMLElement>('[data-mcal-popbody]')!;
+    const popClose = root.querySelector<HTMLElement>('[data-mcal-popclose]');
 
     const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-    const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
     const fmtTime = new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit', timeZone });
     const fmtFull = new Intl.DateTimeFormat('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric', timeZone });
@@ -114,7 +162,7 @@ const {
     // Day header for the schedule (e.g. "Fri"), formatted in UTC from a date key.
     const fmtSchedDow = new Intl.DateTimeFormat('en-US', { weekday: 'short', timeZone: 'UTC' });
 
-    const cache = new Map();
+    const cache = new Map<string, Item[]>();
     let view = new Date();
     view = new Date(view.getFullYear(), view.getMonth(), 1);
     let showPast = false;
@@ -122,20 +170,20 @@ const {
     const todayKey = dayKeyFmt.format(new Date());
 
     // First day of the month through the first day of the next month.
-    function monthRange(d) {
+    function monthRange(d: Date) {
       const start = new Date(d.getFullYear(), d.getMonth(), 1);
       const end = new Date(d.getFullYear(), d.getMonth() + 1, 1);
       return { start, end };
     }
 
-    function dayKeyOf(dateObj) {
+    function dayKeyOf(dateObj: Date) {
       return dayKeyFmt.format(dateObj);
     }
 
     // Date keys (YYYY-MM-DD) an event covers.
-    function coveredKeys(ev) {
+    function coveredKeys(ev: GoogleEvent): string[] {
       if (ev.start.date) {
-        const keys = [];
+        const keys: string[] = [];
         const s = new Date(ev.start.date + 'T00:00:00Z');
         const e = ev.end && ev.end.date ? new Date(ev.end.date + 'T00:00:00Z') : new Date(s.getTime() + 86400000);
         for (let d = new Date(s); d < e; d.setUTCDate(d.getUTCDate() + 1)) {
@@ -143,16 +191,17 @@ const {
         }
         return keys.length ? keys : [ev.start.date];
       }
-      return [dayKeyOf(new Date(ev.start.dateTime))];
+      return [dayKeyOf(new Date(ev.start.dateTime ?? ''))];
     }
 
-    async function fetchMonth(d) {
+    async function fetchMonth(d: Date): Promise<Item[]> {
       const key = `${d.getFullYear()}-${d.getMonth()}`;
-      if (cache.has(key)) return cache.get(key);
+      const cached = cache.get(key);
+      if (cached) return cached;
       if (!apiKey) throw new Error('NO_KEY');
 
       const { start, end } = monthRange(d);
-      const params = (id) =>
+      const params = () =>
         `key=${encodeURIComponent(apiKey)}&singleEvents=true&orderBy=startTime&maxResults=2500` +
         `&timeMin=${encodeURIComponent(start.toISOString())}` +
         `&timeMax=${encodeURIComponent(end.toISOString())}` +
@@ -160,10 +209,10 @@ const {
 
       const results = await Promise.all(
         sources.map(async (s) => {
-          const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(s.id)}/events?${params(s.id)}`;
+          const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(s.id)}/events?${params()}`;
           const res = await fetch(url);
           if (!res.ok) return [];
-          const data = await res.json();
+          const data: { items?: GoogleEvent[] } = await res.json();
           return (data.items || [])
             .filter((ev) => ev.status !== 'cancelled' && (ev.start?.date || ev.start?.dateTime))
             .map((ev) => ({ ev, color: s.color, org: s.name }));
@@ -174,23 +223,24 @@ const {
       return flat;
     }
 
-    function startMs(item) {
+    function startMs(item: Item) {
       const ev = item.ev;
-      return new Date(ev.start.dateTime || ev.start.date + 'T00:00:00').getTime();
+      return new Date(ev.start.dateTime || `${ev.start.date}T00:00:00`).getTime();
     }
 
     // Per-month schedule (agenda) view: a chronological list of the days that
     // have events, each day showing its events in time order.
-    function render(events) {
+    function render(events: Item[]) {
       const ym = `${view.getFullYear()}-${String(view.getMonth() + 1).padStart(2, '0')}`;
       titleEl.textContent = `${MONTHS[view.getMonth()]} ${view.getFullYear()}`;
 
-      const byDay = new Map();
+      const byDay = new Map<string, Item[]>();
       for (const item of events) {
         for (const k of coveredKeys(item.ev)) {
           if (!k.startsWith(ym)) continue; // keep only days in this month
-          if (!byDay.has(k)) byDay.set(k, []);
-          byDay.get(k).push(item);
+          const list = byDay.get(k) ?? [];
+          list.push(item);
+          byDay.set(k, list);
         }
       }
       for (const list of byDay.values()) list.sort((a, b) => startMs(a) - startMs(b));
@@ -218,11 +268,10 @@ const {
         const mmdd = `${key.slice(5, 7)}/${key.slice(8, 10)}`;
         const isToday = key === todayKey;
 
-        const rows = byDay
-          .get(key)
+        const rows = (byDay.get(key) ?? [])
           .map((item) => {
             const idx = window.__mcalEvents.push(item) - 1;
-            const time = item.ev.start.date ? 'All day' : fmtTime.format(new Date(item.ev.start.dateTime));
+            const time = item.ev.start.date ? 'All day' : fmtTime.format(new Date(item.ev.start.dateTime ?? ''));
             const title = (item.ev.summary || 'Event').replace(/</g, '&lt;');
             const org = item.org.replace(/</g, '&lt;');
             return (
@@ -257,7 +306,7 @@ const {
         grid.innerHTML = '';
         titleEl.textContent = `${MONTHS[view.getMonth()]} ${view.getFullYear()}`;
         statusEl.hidden = false;
-        if (err && err.message === 'NO_KEY') {
+        if (err instanceof Error && err.message === 'NO_KEY') {
           statusEl.textContent = 'Calendar isn’t configured yet.';
         } else {
           statusEl.innerHTML = fallbackSrc
@@ -267,10 +316,10 @@ const {
       }
     }
 
-    function openPopover(item) {
+    function openPopover(item: Item) {
       const ev = item.ev;
       const allDay = !!ev.start.date;
-      const startD = new Date(ev.start.dateTime || ev.start.date + 'T00:00:00Z');
+      const startD = new Date(ev.start.dateTime || `${ev.start.date}T00:00:00Z`);
       const when = allDay
         ? fmtFullDate.format(startD) + ' · All day'
         : fmtFull.format(startD) + ' · ' + fmtTime.format(startD) +
@@ -300,17 +349,20 @@ const {
         desc.textContent = ev.description.replace(/<[^>]*>/g, '').trim();
         popBody.append(desc);
       }
-      if (ev.htmlLink) {
+      // From the Google Calendar API, so its scheme is checked before it
+      // becomes an href; a link that fails the check is left out.
+      const link = safeUrl(ev.htmlLink);
+      if (link) {
         const a = document.createElement('a');
         a.className = 'mcal__poplink';
-        a.href = ev.htmlLink;
+        a.href = link;
         a.target = '_blank';
         a.rel = 'noopener noreferrer';
         a.textContent = 'View on Google Calendar ↗';
         popBody.append(a);
       }
       backdrop.hidden = false;
-      root.querySelector('[data-mcal-popclose]').focus();
+      popClose?.focus();
     }
 
     function closePopover() {
@@ -318,7 +370,7 @@ const {
     }
 
     grid.addEventListener('click', (e) => {
-      const evBtn = e.target.closest('[data-eid]');
+      const evBtn = (e.target as Element).closest<HTMLElement>('[data-eid]');
       if (!evBtn) return;
       const item = window.__mcalEvents[Number(evBtn.dataset.eid)];
       if (item) openPopover(item);
@@ -326,26 +378,26 @@ const {
     backdrop.addEventListener('click', (e) => {
       if (e.target === backdrop) closePopover();
     });
-    root.querySelector('[data-mcal-popclose]').addEventListener('click', closePopover);
+    popClose?.addEventListener('click', closePopover);
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && !backdrop.hidden) closePopover();
     });
 
-    root.querySelector('[data-mcal-prev]').addEventListener('click', () => {
+    root.querySelector('[data-mcal-prev]')?.addEventListener('click', () => {
       view = new Date(view.getFullYear(), view.getMonth() - 1, 1);
       load();
     });
-    root.querySelector('[data-mcal-next]').addEventListener('click', () => {
+    root.querySelector('[data-mcal-next]')?.addEventListener('click', () => {
       view = new Date(view.getFullYear(), view.getMonth() + 1, 1);
       load();
     });
-    root.querySelector('[data-mcal-today]').addEventListener('click', () => {
+    root.querySelector('[data-mcal-today]')?.addEventListener('click', () => {
       const now = new Date();
       view = new Date(now.getFullYear(), now.getMonth(), 1);
       load();
     });
-    root.querySelector('[data-mcal-pasttoggle]').addEventListener('change', (e) => {
-      showPast = e.target.checked;
+    root.querySelector('[data-mcal-pasttoggle]')?.addEventListener('change', (e) => {
+      showPast = (e.target as HTMLInputElement).checked;
       load(); // month data is cached; this just re-renders with the new filter
     });
 
