@@ -20,6 +20,7 @@ The homepage calendar fetches events live from the Google Calendar API. Copy
 `.env.example` to `.env` and set `GOOGLE_CALENDAR_PUBLIC_API_KEY` to see it
 locally; without it the calendar shows a notice and falls back to the Google
 embed. See [docs/DEPLOY.md](docs/DEPLOY.md#google-calendar-api-key-setup).
+Every variable the site reads is listed in [`.env.example`](.env.example).
 
 ## What's here
 

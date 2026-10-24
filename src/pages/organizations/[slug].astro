@@ -3,6 +3,7 @@ import Base from '../../layouts/Base.astro';
 import CalendarEmbed from '../../components/CalendarEmbed.astro';
 import { getOrganizations, getOrganization } from '../../lib/data';
 import { singleCalendarUrl } from '../../lib/calendar';
+import { safeUrl } from '../../lib/url';
 
 export async function getStaticPaths() {
   const orgs = await getOrganizations();
@@ -39,18 +40,22 @@ const calUrl = org.calendarId
       {
         org.links.length > 0 && (
           <div class="chips">
-            {org.links.map((link) => (
-              <a
-                class="chip"
-                href={link.url}
-                target={link.url.startsWith('http') ? '_blank' : undefined}
-                rel={
-                  link.url.startsWith('http') ? 'noopener noreferrer' : undefined
-                }
-              >
-                {link.label}
-              </a>
-            ))}
+            {org.links.map((link) =>
+              safeUrl(link.url) === null ? (
+                <span class="chip">{link.label}</span>
+              ) : (
+                <a
+                  class="chip"
+                  href={safeUrl(link.url)}
+                  target={link.url.startsWith('http') ? '_blank' : undefined}
+                  rel={
+                    link.url.startsWith('http') ? 'noopener noreferrer' : undefined
+                  }
+                >
+                  {link.label}
+                </a>
+              ),
+            )}
           </div>
         )
       }
