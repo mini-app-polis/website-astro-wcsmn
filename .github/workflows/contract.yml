@@ -3,7 +3,7 @@ name: Contract
 # The live contract suite (tests/contract): the one call this site makes to
 # api-kaianolevine-com — the contact form's POST /v1/contact — checked
 # against the development API for the field names it sends and the refusal
-# it relies on (TEST-016, ADR-012). The form posts to the production API;
+# it relies on (TEST-016, ecosystem-standards ADR-0012). The form posts to the production API;
 # this checks the same code on dev, which is where a change lands first.
 #
 # Read-only — see tests/contract/harness.mjs — so it needs no key, refuses
