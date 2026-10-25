@@ -1,3 +1,10 @@
+## [2.4.10](https://github.com/mini-app-polis/website-astro-wcsmn/compare/v2.4.9...v2.4.10) (2026-10-25)
+
+
+### Bug Fixes
+
+* **deps:** bump astro from 7.3.8 to 7.4.0 in the minor-and-patch group ([b434abd](https://github.com/mini-app-polis/website-astro-wcsmn/commit/b434abd3a54ac34b3a7a1a633875378d88db6434))
+
 ## [2.4.9](https://github.com/mini-app-polis/website-astro-wcsmn/compare/v2.4.8...v2.4.9) (2026-10-24)
 
 
