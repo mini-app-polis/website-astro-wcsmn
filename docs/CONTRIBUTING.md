@@ -101,10 +101,9 @@ version. Use these prefixes:
 | --- | --- | --- |
 | `fix:` | patch (2.1.0 → 2.1.1) | `fix: correct TC Rebels calendar color` |
 | `feat:` | minor (2.1.0 → 2.2.0) | `feat: add North Shore Swing` |
-| `feat!:` or `BREAKING CHANGE:` | major (2.1.0 → 3.0.0) | `feat!: drop legacy org schema` |
 | `chore:`, `docs:`, `refactor:`, `style:` | no release | `docs: expand contributing guide` |
 
-See [RELEASING.md](RELEASING.md) for the full flow.
+Don't use `feat!:` or a `BREAKING CHANGE:` footer; see [RELEASING.md](RELEASING.md) for why, and for the full flow.
 
 ### Updating the contributors list
 

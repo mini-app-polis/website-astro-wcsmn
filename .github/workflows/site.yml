@@ -15,9 +15,9 @@ name: site
 # All of it is read-only, so it is safe against production.
 #
 # The site has no identity provider, so there is no key to check for its
-# environment. The contact form's API is the production API in both
-# environments — src/pages/contact.astro names it outright, and there is no
-# development wiring — so both runs check that one.
+# environment. The contact form posts to PUBLIC_API_URL, baked in from the
+# Pages settings: the production API on main, the development API on dev.
+# Each run checks the form names its own environment's API.
 #
 # It runs on pushes. Not on the promotion pull request to main: its head is
 # dev's latest commit, already tested by the push run, whose result the pull
@@ -42,7 +42,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  API: https://api.kaianolevine.com
+  API: ${{ github.ref == 'refs/heads/main' && 'https://api.kaianolevine.com' || 'https://dev-api.kaianolevine.com' }}
   SHA: ${{ github.sha }}
 
 jobs:
@@ -112,6 +112,6 @@ jobs:
 
           contact=$(get /contact/) || fail "$SITE/contact/ did not load."
           grep -qF "action=\"$API/v1/contact\"" <<<"$contact" \
-            || fail "The contact form does not post to $API/v1/contact."
+            || fail "The contact form does not post to $API/v1/contact — check PUBLIC_API_URL in Pages."
           curl -fsS -o /dev/null --retry 3 "$API/health" || fail "$API/health did not answer."
           echo "Site OK at $SITE (contact form posts to $API)"
