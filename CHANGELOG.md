@@ -1,3 +1,77 @@
+## [2.4.10](https://github.com/mini-app-polis/website-astro-wcsmn/compare/v2.4.9...v2.4.10) (2026-10-25)
+
+
+### Bug Fixes
+
+* **deps:** bump astro from 7.3.8 to 7.4.0 in the minor-and-patch group ([b434abd](https://github.com/mini-app-polis/website-astro-wcsmn/commit/b434abd3a54ac34b3a7a1a633875378d88db6434))
+
+## [2.4.9](https://github.com/mini-app-polis/website-astro-wcsmn/compare/v2.4.8...v2.4.9) (2026-10-24)
+
+
+### Bug Fixes
+
+* **calendar:** check the event popup's Google Calendar link with safeUrl() ([2c30fb7](https://github.com/mini-app-polis/website-astro-wcsmn/commit/2c30fb7029e850cb705b6fd404829a1a9123aeb5))
+* **deps:** patch zod, http-cache-semantics, fast-uri and undici ([b2cb874](https://github.com/mini-app-polis/website-astro-wcsmn/commit/b2cb87439348525468f8a2daa24bc3416473a487))
+* **security:** check the scheme of organisation links before rendering them ([461eb75](https://github.com/mini-app-polis/website-astro-wcsmn/commit/461eb7503f9918ad143e32c46df29dcfe1e9d283))
+
+## [2.4.8](https://github.com/mini-app-polis/website-astro-wcsmn/compare/v2.4.7...v2.4.8) (2026-10-16)
+
+
+### Bug Fixes
+
+* **ci:** follow a newer branch deploy when Pages skips this commit's build ([0c84fcd](https://github.com/mini-app-polis/website-astro-wcsmn/commit/0c84fcdfb58ddd870bddcd470b25cfef5f98bfcb))
+
+## [2.4.7](https://github.com/mini-app-polis/website-astro-wcsmn/compare/v2.4.6...v2.4.7) (2026-10-16)
+
+
+### Bug Fixes
+
+* **deps:** bump astro from 7.3.5 to 7.3.8 in the minor-and-patch group ([9a95142](https://github.com/mini-app-polis/website-astro-wcsmn/commit/9a95142285ec8f393ec93092274f8f0c07bdda92))
+
+## [2.4.6](https://github.com/mini-app-polis/website-astro-wcsmn/compare/v2.4.5...v2.4.6) (2026-10-14)
+
+
+### Bug Fixes
+
+* **build:** read the calendar key as GOOGLE_CALENDAR_PUBLIC_API_KEY ([cba130d](https://github.com/mini-app-polis/website-astro-wcsmn/commit/cba130dba27dc3a7abd78adaf29f5e84e21ca6d9))
+
+## [2.4.5](https://github.com/mini-app-polis/website-astro-wcsmn/compare/v2.4.4...v2.4.5) (2026-10-08)
+
+
+### Bug Fixes
+
+* **deps:** bump sharp, source-map-js for security advisories ([6b3068d](https://github.com/mini-app-polis/website-astro-wcsmn/commit/6b3068d5d7f2b66724a6d50469bbcbc74851f1b5))
+
+## [2.4.4](https://github.com/mini-app-polis/website-astro-wcsmn/compare/v2.4.3...v2.4.4) (2026-10-03)
+
+
+### Bug Fixes
+
+* **deps:** patch devalue and fast-uri; time-box the http-cache-semantics advisory ([064e272](https://github.com/mini-app-polis/website-astro-wcsmn/commit/064e2726a2c7b5bc2b565b708bd17d10714fe78d))
+* **release:** let Cloudflare Pages build the release commit ([9fbcd90](https://github.com/mini-app-polis/website-astro-wcsmn/commit/9fbcd9020bf89b11a1c41132d458aa1ad192ab92))
+
+## [2.4.3](https://github.com/mini-app-polis/website-astro-wcsmn/compare/v2.4.2...v2.4.3) (2026-09-28)
+
+
+### Bug Fixes
+
+* **deps:** bump astro in the js-minor-and-patch group ([54ce0bb](https://github.com/mini-app-polis/website-astro-wcsmn/commit/54ce0bb7d0bf2cb5de6169f399d251f124e70501))
+
+## [2.4.2](https://github.com/mini-app-polis/website-astro-wcsmn/compare/v2.4.1...v2.4.2) (2026-09-21)
+
+
+### Bug Fixes
+
+* **deps:** bump astro in the js-minor-and-patch group ([20c3bf9](https://github.com/mini-app-polis/website-astro-wcsmn/commit/20c3bf932f897ad247dc37d698ead2641be0ff12))
+* **deps:** bump astro in the js-minor-and-patch group ([a4a31c1](https://github.com/mini-app-polis/website-astro-wcsmn/commit/a4a31c1884dc112692418961bb6588e89346079d))
+
+## [2.4.1](https://github.com/mini-app-polis/website-astro-wcsmn/compare/v2.4.0...v2.4.1) (2026-09-10)
+
+
+### Bug Fixes
+
+* **deps:** pin astro, @astrojs/sitemap and @astrojs/check to exact versions ([17fc204](https://github.com/mini-app-polis/website-astro-wcsmn/commit/17fc204dc34204cdb46e0605da18aaae715fe330))
+
 # [2.4.0](https://github.com/mini-app-polis/website-astro-wcsmn/compare/v2.3.2...v2.4.0) (2026-08-25)
 
 

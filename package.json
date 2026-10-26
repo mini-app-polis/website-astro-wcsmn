@@ -1,7 +1,7 @@
 {
   "name": "website-astro-wcsmn",
   "type": "module",
-  "version": "2.4.0",
+  "version": "2.4.10",
   "private": true,
   "scripts": {
     "dev": "astro dev",
