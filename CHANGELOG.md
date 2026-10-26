@@ -1,3 +1,10 @@
+## [2.4.11](https://github.com/mini-app-polis/website-astro-wcsmn/compare/v2.4.10...v2.4.11) (2026-10-26)
+
+
+### Bug Fixes
+
+* post the contact form to the environment's API, link the current repository, and type-check in CI ([f5c387e](https://github.com/mini-app-polis/website-astro-wcsmn/commit/f5c387ec1d6ffc5d6f35d64c31c5c045423051e3))
+
 ## [2.4.10](https://github.com/mini-app-polis/website-astro-wcsmn/compare/v2.4.9...v2.4.10) (2026-10-25)
 
 
