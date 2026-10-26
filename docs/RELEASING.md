@@ -12,11 +12,19 @@ version, git tag, GitHub release, and `CHANGELOG.md` are derived from them.
    after the `test` and `security` jobs pass.
 3. semantic-release inspects the commits since the last tag and decides the
    next version:
-   - `fix:` → patch, `feat:` → minor, `feat!:`/`BREAKING CHANGE:` → major.
+   - `fix:` → patch, `feat:` → minor.
    - `chore:`/`docs:`/`refactor:`/`style:` → no release.
 4. If a release is warranted, it updates `package.json` + `package-lock.json`,
    prepends to `CHANGELOG.md`, creates the `vX.Y.Z` tag and GitHub release, and
    commits the version bump back to `main`.
+
+## Breaking-change markers are not used here
+
+`!` after the type, or a `BREAKING CHANGE:` footer, makes semantic-release cut
+a major. Don't use either in this repo. Nothing consumes this site, so a major
+says nothing and only inflates the version. Describe a change that would be
+breaking elsewhere (a moved URL, a dropped page) in the commit body, and land
+it as a `feat` or `fix`.
 
 ## Config
 

@@ -53,9 +53,11 @@ deploys: one for your change, and one for the semantic-release commit that bumps
 
 ## The contact form
 
-The contact form (`src/pages/contact.astro`) posts to an external API at
-`https://api.kaianolevine.com/v1/contact` and is protected by Cloudflare
-Turnstile (site key in the page) plus a hidden honeypot field. That endpoint is
+The contact form (`src/pages/contact.astro`) posts to `/v1/contact` on the API
+named by `PUBLIC_API_URL`: the production API for `main` builds, the
+development API for previews. It is protected by Cloudflare Turnstile (site key
+from `PUBLIC_TURNSTILE_SITE_KEY`) plus a hidden honeypot field. Both variables
+are set by infra, and a build without them stops. That endpoint is
 separate infrastructure — this site only submits to it; it does not host it.
 
 ## Local production check

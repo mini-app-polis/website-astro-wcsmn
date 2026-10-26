@@ -22,7 +22,7 @@ const build = getBuildInfo();
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <meta name="theme-color" content="#dd4462" />
-    <link rel="canonical" href={Astro.url.href} />
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site).href} />
 
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
