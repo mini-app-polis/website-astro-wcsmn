@@ -19,6 +19,10 @@ export interface BuildInfo {
   branch: string;
 }
 
+/**
+ * Returns the footer's build info: the release version on `main` or
+ * `dev@<branch>` on previews, plus the short commit SHA and branch name.
+ */
 export function getBuildInfo(): BuildInfo {
   const sha = process.env.CF_PAGES_COMMIT_SHA || '';
   const shortSha = sha ? sha.slice(0, 7) : 'local';
