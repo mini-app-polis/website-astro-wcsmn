@@ -1,3 +1,10 @@
+## [2.4.15](https://github.com/mini-app-polis/website-astro-wcsmn/compare/v2.4.14...v2.4.15) (2026-11-17)
+
+
+### Bug Fixes
+
+* **security:** except picomatch GHSA-fc5q-39xc-vjpf and drop the cleared http-cache-semantics entry ([e1f2f19](https://github.com/mini-app-polis/website-astro-wcsmn/commit/e1f2f194629db1089beed63fc891fab27aa44656))
+
 ## [2.4.14](https://github.com/mini-app-polis/website-astro-wcsmn/compare/v2.4.13...v2.4.14) (2026-11-16)
 
 
